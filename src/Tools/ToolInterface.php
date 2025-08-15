@@ -6,38 +6,38 @@ use JsonSerializable;
 interface ToolInterface extends JsonSerializable
 {
     /**
-     * Obtém o nome da tool
+     * Gets the tool name
      *
      * @return string
      */
     public function getName();
 
     /**
-     * Obtém a descrição da tool
+     * Gets the tool description
      *
      * @return string
      */
     public function getDescription();
 
     /**
-     * Obtém o schema dos parâmetros da tool
+     * Gets the tool parameter schema
      *
      * @return array
      */
     public function getParametersSchema();
 
     /**
-     * Converte a tool para o formato esperado pela API
+     * Converts the tool to the expected API format
      *
      * @return array
      */
     public function toArray();
 
     /**
-     * Executa a tool com os parâmetros fornecidos
+     * Executes the tool with provided parameters
      *
-     * @param array $arguments Argumentos passados pelo modelo
-     * @return mixed Resultado da execução
+     * @param array $arguments Arguments passed by the model
+     * @return mixed Execution result
      */
     public function execute(array $arguments);
 }

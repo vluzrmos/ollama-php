@@ -5,8 +5,8 @@ namespace Vluzrmos\Ollama\Tools;
 use JsonSerializable;
 
 /**
- * Gerenciador de tools do sistema
- * Responsável por registrar, listar e executar tools disponíveis
+ * System tools manager
+ * Responsible for registering, listing and executing available tools
  */
 class ToolManager implements JsonSerializable
 {
@@ -24,7 +24,7 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Registra uma nova tool
+     * Registers a new tool
      *
      * @param ToolInterface $tool
      * @return void
@@ -35,7 +35,7 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Remove uma tool registrada
+     * Removes a registered tool
      *
      * @param string $toolName
      * @return bool
@@ -50,7 +50,7 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Obtém uma tool pelo nome
+     * Gets a tool by name
      *
      * @param string $toolName
      * @return ToolInterface|null
@@ -61,7 +61,7 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Lista todas as tools registradas
+     * Lists all registered tools
      *
      * @return array
      */
@@ -81,7 +81,7 @@ class ToolManager implements JsonSerializable
         return $tools;
     }
     /**
-     * Obtém todas as tools no formato da API
+     * Gets all tools in API format
      *
      * @return array
      */
@@ -97,7 +97,7 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Executa uma tool pelo nome com argumentos
+     * Executes a tool by name with arguments
      *
      * @param string $toolName
      * @param array $arguments
@@ -109,7 +109,7 @@ class ToolManager implements JsonSerializable
         $tool = $this->getTool($toolName);
         if ($tool === null) {
             return json_encode(array(
-                'error' => 'Tool não encontrada: ' . $toolName
+                'error' => 'Tool not found: ' . $toolName
             ));
         }
 
@@ -117,7 +117,7 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Verifica se uma tool existe
+     * Checks if a tool exists
      *
      * @param string $toolName
      * @return bool
@@ -128,7 +128,128 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Obtém estatísticas sobre as tools registradas
+     * Executes multiple tool calls received from an API response
+     * 
+     * @param array $toolCalls Array of tool calls in OpenAI/Ollama format
+     * @return array Array with execution results
+     * @throws Exception If any tool is not found
+     */
+    public function executeToolCalls(array $toolCalls)
+    {
+        $results = array();
+
+        foreach ($toolCalls as $toolCall) {
+            // Validate tool call structure
+            if (!isset($toolCall['function'])) {
+                $results[] = array(
+                    'id' => isset($toolCall['id']) ? $toolCall['id'] : null,
+                    'error' => 'Invalid tool call: function not specified',
+                    'success' => false
+                );
+                continue;
+            }
+
+            $function = $toolCall['function'];
+            $toolName = $function['name'];
+            $toolId = isset($toolCall['id']) ? $toolCall['id'] : null;
+
+            // Decode arguments (which may come as JSON string)
+            $arguments = array();
+            if (isset($function['arguments'])) {
+                if (is_string($function['arguments'])) {
+                    $decodedArgs = json_decode($function['arguments'], true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $arguments = $decodedArgs;
+                    } else {
+                        $results[] = array(
+                            'id' => $toolId,
+                            'error' => 'Invalid JSON arguments: ' . json_last_error_msg(),
+                            'success' => false,
+                            'tool_name' => $toolName
+                        );
+                        continue;
+                    }
+                } else if (is_array($function['arguments'])) {
+                    $arguments = $function['arguments'];
+                }
+            }
+
+            // Execute the tool
+            try {
+                if (!$this->hasTool($toolName)) {
+                    $results[] = array(
+                        'id' => $toolId,
+                        'error' => 'Tool not found: ' . $toolName,
+                        'success' => false,
+                        'tool_name' => $toolName
+                    );
+                    continue;
+                }
+
+                $result = $this->executeTool($toolName, $arguments);
+                
+                $results[] = array(
+                    'id' => $toolId,
+                    'result' => $result,
+                    'success' => true,
+                    'tool_name' => $toolName
+                );
+
+            } catch (\Exception $e) {
+                $results[] = array(
+                    'id' => $toolId,
+                    'error' => $e->getMessage(),
+                    'success' => false,
+                    'tool_name' => $toolName
+                );
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Converts tool call results to response message format
+     * 
+     * @param array $toolCallResults Results from executeToolCalls method
+     * @return array Array of messages in the expected API format
+     */
+    public function toolCallResultsToMessages(array $toolCallResults)
+    {
+        $messages = array();
+
+        foreach ($toolCallResults as $result) {
+            $content = '';
+            
+            if ($result['success']) {
+                $content = is_string($result['result']) ? $result['result'] : json_encode($result['result']);
+            } else {
+                $content = 'Error: ' . $result['error'];
+            }
+
+            $message = array(
+                'role' => 'tool',
+                'content' => $content
+            );
+
+            // Add tool_call_id if available (OpenAI format)
+            if (isset($result['id']) && $result['id'] !== null) {
+                $message['tool_call_id'] = $result['id'];
+            }
+
+            // Add tool name if available (Ollama format)
+            if (isset($result['tool_name'])) {
+                $message['tool_name'] = $result['tool_name'];
+            }
+
+            $messages[] = $message;
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Gets statistics about registered tools
      *
      * @return array
      */

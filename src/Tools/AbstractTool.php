@@ -5,13 +5,13 @@ namespace Vluzrmos\Ollama\Tools;
 use JsonSerializable;
 
 /**
- * Classe abstrata base para implementação de tools
- * Fornece uma implementação padrão do método toArray()
+ * Abstract base class for tool implementation
+ * Provides a default implementation of the toArray() method
  */
 abstract class AbstractTool implements ToolInterface
 {
     /**
-     * Converte a tool para o formato esperado pela API
+     * Converts the tool to the expected API format
      *
      * @return array
      */
