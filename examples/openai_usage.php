@@ -6,7 +6,7 @@ use Ollama\OpenAI;
 use Ollama\Models\Model;
 use Ollama\Utils\ImageHelper;
 
-// Configurar cliente OpenAI compatível
+// Configure OpenAI compatible client
 $openai = new OpenAI(getenv('OPENAI_API_URL', 'http://localhost:11434/v1'), 'ollama');
 
 $model = new Model('qwen2.5:3b');
@@ -14,11 +14,11 @@ $modelReasoning = new Model('qwen3:4b');
 $modelVision = new Model('qwen2.5vl:3b');
 $modelEmbedding = new Model('all-minilm');
 
-echo "=== Exemplo OpenAI 1: Chat Completions ===\n";
+echo "=== OpenAI Example 1: Chat Completions ===\n";
 try {
     $openai->chatStream($model, [
-        $openai->systemMessage('Você é um assistente útil que responde em português.'),
-        $openai->userMessage('Olá, como você está?')
+        $openai->systemMessage('You are a helpful assistant that responds in English.'),
+        $openai->userMessage('Hello, how are you?')
     ], function ($chunk) {
         if (isset($chunk['choices'][0]['delta']['content'])) {
             echo $chunk['choices'][0]['delta']['content'];
@@ -27,14 +27,14 @@ try {
 
     echo "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo OpenAI 2: Chat com Model Class ===\n";
+echo "=== OpenAI Example 2: Chat with Model Class ===\n";
 try {    
     $openai->chatStream($model, [
-        $openai->systemMessage('Você é um poeta que escreve em português.'),
-        $openai->userMessage('Escreva um haiku sobre o mar'),
+        $openai->systemMessage('You are a poet who writes in English.'),
+        $openai->userMessage('Write a haiku about the ocean'),
     ], function ($chunk) {
         if (isset($chunk['choices'][0]['delta']['content'])) {
             echo $chunk['choices'][0]['delta']['content'];
@@ -43,43 +43,43 @@ try {
 
     echo "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo OpenAI 3: Completions ===\n";
+echo "=== OpenAI Example 3: Completions ===\n";
 try {
-    $response = $openai->complete($model, 'O que é inteligência artificial?', [
+    $response = $openai->complete($model, 'What is artificial intelligence?', [
         'max_tokens' => 100,
         'temperature' => 0.7
     ]);
     
-    echo "Resposta: " . $response['choices'][0]['text'] . "\n\n";
+    echo "Response: " . $response['choices'][0]['text'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
-echo "=== Exemplo OpenAI 4: Chat com Imagem (Llava) ===\n";
+echo "=== OpenAI Example 4: Chat with Image (Llava) ===\n";
 try {
-    // Exemplo com imagem base64 (substitua por uma imagem real)
+    // Example with base64 image (replace with a real image)
     $imageBase64 = ImageHelper::encodeImageUrl(__DIR__ . '/sample.png');
     
-    echo "Imagem base64: " . substr($imageBase64, 0, 30) . "...\n"; // Apenas para demonstração
+    echo "Base64 image: " . substr($imageBase64, 0, 30) . "...\n"; // Just for demonstration
 
     $response = $openai->chat($modelVision, [
-        $openai->systemMessage('Você é um assistente que pode ver imagens e responder em português.'),
-        $openai->imageMessage('O que você vê nesta imagem?', $imageBase64)
+        $openai->systemMessage('You are an assistant that can see images and respond in English.'),
+        $openai->imageMessage('What do you see in this image?', $imageBase64)
     ]);
     
-    echo "Resposta: " . $response['choices'][0]['message']['content'] . "\n\n";
+    echo "Response: " . $response['choices'][0]['message']['content'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
 
-echo "=== Exemplo OpenAI 5: Streaming Chat ===\n";
+echo "=== OpenAI Example 5: Streaming Chat ===\n";
 try {
-    echo "Resposta streaming: ";
+    echo "Streaming response: ";
     $openai->chatStream($model, [
-        $openai->userMessage('Conte uma história curta')
+        $openai->userMessage('Tell me a short story')
     ], function($chunk) {
         if (isset($chunk['choices'][0]['delta']['content'])) {
             echo $chunk['choices'][0]['delta']['content'];
@@ -87,62 +87,62 @@ try {
     });
     echo "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo OpenAI 6: Embeddings ===\n";
+echo "=== OpenAI Example 6: Embeddings ===\n";
 try {
     $response = $openai->embed($modelEmbedding, [
-        'Por que o céu é azul?',
-        'Por que a grama é verde?'
+        'Why is the sky blue?',
+        'Why is grass green?'
     ]);
     
-    echo "Embeddings gerados para " . count($response['data']) . " textos\n";
-    echo "Dimensões: " . count($response['data'][0]['embedding']) . "\n\n";
+    echo "Generated embeddings for " . count($response['data']) . " texts\n";
+    echo "Dimensions: " . count($response['data'][0]['embedding']) . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo OpenAI 7: Listar Modelos ===\n";
+echo "=== OpenAI Example 7: List Models ===\n";
 try {
     $models = $openai->listModels();
-    echo "Modelos disponíveis:\n";
+    echo "Available models:\n";
     foreach ($models['data'] as $modelInfoItem) {
         echo "- " . $modelInfoItem['id'] . " (owner: " . $modelInfoItem['owned_by'] . ")\n";
     }
     echo "\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
-echo "=== Exemplo OpenAI 8: Informações de Modelo ===\n";
+echo "=== OpenAI Example 8: Model Information ===\n";
 try {
     $modelInfo = $openai->retrieveModel($model);
-    echo "Informações do modelo:\n";
+    echo "Model information:\n";
     echo "- ID: " . $modelInfo['id'] . "\n";
-    echo "- Objeto: " . $modelInfo['object'] . "\n";
-    echo "- Proprietário: " . $modelInfo['owned_by'] . "\n\n";
+    echo "- Object: " . $modelInfo['object'] . "\n";
+    echo "- Owner: " . $modelInfo['owned_by'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo OpenAI 9: Chat com JSON Mode ===\n";
+echo "=== OpenAI Example 9: Chat with JSON Mode ===\n";
 try {
     $response = $openai->chat($model, [
-        $openai->systemMessage('Você é um assistente que sempre responde em formato JSON válido. Manter o formato do json_schema fornecido, não traduzir nome dos campos.'),
-        $openai->userMessage('Liste 3 cores primárias')
+        $openai->systemMessage('You are an assistant that always responds in valid JSON format. Keep the json_schema format provided, do not translate field names.'),
+        $openai->userMessage('List 3 primary colors')
     ], [
         'response_format' => [
             'type' => 'json_schema',
             'json_schema' => [
                 'name' => 'primary_colors',
-                'description' => 'Lista de cores primárias',
+                'description' => 'List of primary colors',
                 'strict' => true,
                 'schema' => [
                     'type' => 'object',
                     'properties' => [
                         'colors' => [
                             'type' => 'array',
-                            'description' => 'Lista de cores primárias no idioma do usuário',
+                            'description' => 'List of primary colors in user language',
                             'items' => ['type' => 'string']
                         ]
                     ],
@@ -156,10 +156,10 @@ try {
     
     echo  $response['choices'][0]['message']['content'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo OpenAI 10: Tools (Function Calling) ===\n";
+echo "=== OpenAI Example 10: Tools (Function Calling) ===\n";
 
 try {
     $tools = [
@@ -167,13 +167,13 @@ try {
             'type' => 'function',
             'function' => [
                 'name' => 'get_current_weather',
-                'description' => 'Obtém o clima atual de uma localização',
+                'description' => 'Get current weather from a location',
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
                         'location' => [
                             'type' => 'string',
-                            'description' => 'A cidade e estado, ex: São Paulo, SP'
+                            'description' => 'The city and state, e.g. São Paulo, SP'
                         ],
                         'unit' => [
                             'type' => 'string',
@@ -189,13 +189,13 @@ try {
     $response = $openai->chatCompletions([
         'model' => $model,
         'messages' => [
-            $openai->systemMessage('Você é um assistente útil que pode ajudar com informações sobre o clima.'),
-            $openai->userMessage('Qual é o clima em São Paulo hoje?')
+            $openai->systemMessage('You are a helpful assistant that can help with weather information.'),
+            $openai->userMessage('What is the weather in São Paulo today?')
         ],
         'tools' => $tools
     ]);
     
-    echo "Resposta com tools: " . json_encode($response['choices'][0]['message'], JSON_PRETTY_PRINT) . "\n\n";
+    echo "Response with tools: " . json_encode($response['choices'][0]['message'], JSON_PRETTY_PRINT) . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }

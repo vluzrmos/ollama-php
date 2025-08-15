@@ -1,31 +1,31 @@
 # Ollama PHP Client
 
-Cliente PHP para a API do Ollama, compatível com PHP 5.6+. Esta biblioteca fornece uma interface fácil de usar para interagir com o servidor Ollama e também inclui compatibilidade com a API OpenAI.
+PHP client for Ollama API, compatible with PHP 5.6+. This library provides an easy-to-use interface to interact with Ollama server and also includes OpenAI API compatibility.
 
-## Características
+## Features
 
-- ✅ Compatível com PHP 5.6+
-- ✅ Suporte completo à API nativa do Ollama
-- ✅ **Nova**: Compatibilidade com OpenAI API endpoints
-- ✅ **Nova**: Classe `Model` para configuração reutilizável de modelos
-- ✅ Chat completions com histórico
-- ✅ Streaming de respostas
-- ✅ Suporte a imagens (modelos de visão como Llava)
+- ✅ Compatible with PHP 5.6+
+- ✅ Full support for Ollama native API
+- ✅ **New**: OpenAI API endpoints compatibility
+- ✅ **New**: `Model` class for reusable model configuration
+- ✅ Chat completions with history
+- ✅ Response streaming
+- ✅ Image support (vision models like Llava)
 - ✅ Function calling (tools)
 - ✅ Embeddings
-- ✅ Gerenciamento de modelos
-- ✅ Tratamento de erros robusto
-- ✅ Documentação completa
+- ✅ Model management
+- ✅ Robust error handling
+- ✅ Complete documentation
 
-## Instalação
+## Installation
 
 ```bash
 composer require vluzrrmos/ollama-php
 ```
 
-## Uso Rápido
+## Quick Usage
 
-### Cliente Ollama (API Nativa)
+### Ollama Client (Native API)
 
 ```php
 <?php
@@ -35,94 +35,94 @@ use Ollama\Ollama;
 use Ollama\Models\Message;
 use Ollama\Models\Model;
 
-// Criar cliente
+// Create client
 $ollama = new Ollama('http://localhost:11434');
 
-// Chat simples
+// Simple chat
 $response = $ollama->chat([
     'model' => 'llama3.2',
     'messages' => [
-        Message::system('Você é um assistente útil.')->toArray(),
-        Message::user('Olá!')->toArray()
+        Message::system('You are a helpful assistant.')->toArray(),
+        Message::user('Hello!')->toArray()
     ]
 ]);
 
 echo $response['message']['content'];
 ```
 
-### Cliente OpenAI (Compatível)
+### OpenAI Client (Compatible)
 
 ```php
 <?php
 use Ollama\OpenAI;
 use Ollama\Models\Model;
 
-// Criar cliente OpenAI compatível
+// Create OpenAI compatible client
 $openai = new OpenAI('http://localhost:11434/v1', 'ollama');
 
-// Chat usando métodos OpenAI
+// Chat using OpenAI methods
 $response = $openai->chat('llama3.2', [
-    $openai->systemMessage('Você é um assistente útil.'),
-    $openai->userMessage('Olá!')
+    $openai->systemMessage('You are a helpful assistant.'),
+    $openai->userMessage('Hello!')
 ]);
 
 echo $response['choices'][0]['message']['content'];
 ```
 
-### Classe Model para Reutilização
+### Model Class for Reuse
 
 ```php
 <?php
 use Ollama\Models\Model;
 
-// Criar modelo
+// Create model
 $model = (new Model('llama3.2'))
     ->setTemperature(0.8)
     ->setTopP(0.9)
     ->setNumCtx(4096)
     ->setSeed(42);
 
-// Usar com OpenAI client
+// Use with OpenAI client
 $response = $openai->chat($model, [
-    $openai->userMessage('Conte uma história')
+    $openai->userMessage('Tell me a story')
 ]);
 
-// Ou usar com Ollama client
+// Or use with Ollama client
 $params = array_merge($model->toArray(), [
-    'messages' => [Message::user('Conte uma história')->toArray()]
+    'messages' => [Message::user('Tell me a story')->toArray()]
 ]);
 $response = $ollama->chat($params);
 ```
 
-## Exemplos Avançados
+## Advanced Examples
 
 ### Streaming
 
 ```php
-// Com cliente Ollama
+// With Ollama client
 $ollama->generate([
     'model' => 'llama3.2',
-    'prompt' => 'Conte uma história',
+    'prompt' => 'Tell me a story',
     'stream' => true
 ], function($chunk) {
     if (isset($chunk['response']) echo $chunk['response'];
 });
 
-// Com cliente OpenAI
+// With OpenAI client
 $openai->chatStream('llama3.2', [
-    $openai->userMessage('Conte uma história')
+    $openai->userMessage('Tell me a story')
 ], function($chunk) {
     if (isset($chunk['choices'][0]['delta']['content']) echo $chunk['choices'][0]['delta']['content'];
 });
 ```
 
-### Modelos com Visão (Imagens)
+### Vision Models (Images)
 
 ```php
-// Com cliente OpenAI
+// With OpenAI client
 $response = $openai->chat('llava', [
     $openai->imageMessage(
-        'O que você vê nesta imagem?',
+        'What do you see in this image?',
         'data:image/png;base64,iVBORw0KGg...'
     )
 ]);
@@ -136,13 +136,13 @@ $tools = [
         'type' => 'function',
         'function' => [
             'name' => 'get_weather',
-            'description' => 'Obtém informações do clima',
+            'description' => 'Get weather information',
             'parameters' => [
                 'type' => 'object',
                 'properties' => [
                     'location' => [
                         'type' => 'string',
-                        'description' => 'Localização'
+                        'description' => 'Location'
                     ]
                 ],
                 'required' => ['location']
@@ -154,7 +154,7 @@ $tools = [
 $response = $openai->chatCompletions([
     'model' => 'llama3.2',
     'messages' => [
-        $openai->userMessage('Como está o clima em São Paulo?')
+        $openai->userMessage('How is the weather in São Paulo?')
     ],
     'tools' => $tools
 ]);
@@ -164,8 +164,8 @@ $response = $openai->chatCompletions([
 
 ```php
 $response = $openai->chat('llama3.2', [
-    $openai->systemMessage('Responda sempre em JSON válido.'),
-    $openai->userMessage('Liste 3 cores primárias')
+    $openai->systemMessage('Always respond in valid JSON.'),
+    $openai->userMessage('List 3 primary colors')
 ], [
     'response_format' => $openai->jsonFormat()
 ]);
@@ -178,20 +178,20 @@ $response = $openai->chat('llama3.2', [
 
 $response = $openai->chat('llama3.2', [
     'messages' => [
-        Message::user('Quais são as cores primárias?')->toArray()
+        Message::user('What are the primary colors?')->toArray()
     ],
     'response_format' => [
             'type' => 'json_schema',
             'json_schema' => [
                 'name' => 'primary_colors',
-                'description' => 'Lista de cores primárias',
+                'description' => 'List of primary colors',
                 'strict' => true,
                 'schema' => [
                     'type' => 'object',
                     'properties' => [
                         'colors' => [
                             'type' => 'array',
-                            'description' => 'Lista de cores primárias no idioma do usuário',
+                            'description' => 'List of primary colors in user language',
                             'items' => ['type' => 'string']
                         ]
                     ],
@@ -207,11 +207,11 @@ echo json_encode($response['choices'][0]['message']['content'], JSON_PRETTY_PRIN
 
 ```json
 {
-    "colors": ["vermelho", "azul", "amarelo"]
+    "colors": ["red", "blue", "yellow"]
 }
 ```
 
-> Note: O formato JSON Schema é útil para validar a estrutura da resposta e garantir que ela atenda às expectativas do usuário. Nem todos os modelos suportam esse formato, então verifique a documentação do modelo específico.
+> Note: JSON Schema format is useful for validating response structure and ensuring it meets user expectations. Not all models support this format, so check the specific model documentation.
 
 ### Embeddings
 
@@ -219,19 +219,19 @@ echo json_encode($response['choices'][0]['message']['content'], JSON_PRETTY_PRIN
 // Ollama
 $response = $ollama->embeddings([
     'model' => 'all-minilm',
-    'input' => 'Texto para embedding'
+    'input' => 'Text for embedding'
 ]);
 
 // OpenAI
 $response = $openai->embed('all-minilm', [
-    'Primeiro texto',
-    'Segundo texto'
+    'First text',
+    'Second text'
 ]);
 ```
 
-## Compatibilidade OpenAI
+## OpenAI Compatibility
 
-Esta biblioteca implementa os seguintes endpoints da OpenAI API:
+This library implements the following OpenAI API endpoints:
 
 - ✅ `/v1/chat/completions`
 - ✅ `/v1/completions` 
@@ -239,7 +239,7 @@ Esta biblioteca implementa os seguintes endpoints da OpenAI API:
 - ✅ `/v1/models`
 - ✅ `/v1/models/{model}`
 
-### Parâmetros Suportados
+### Supported Parameters
 
 #### Chat Completions
 - `model`, `messages`, `temperature`, `top_p`, `max_tokens`
@@ -254,43 +254,43 @@ Esta biblioteca implementa os seguintes endpoints da OpenAI API:
 - `frequency_penalty`, `presence_penalty`
 
 #### Embeddings
-- `model`, `input` (string ou array)
+- `model`, `input` (string or array)
 
-## Gerenciamento de Modelos
+## Model Management
 
 ```php
-// Listar modelos
+// List models
 $models = $ollama->listModels();
 
-// Baixar modelo
+// Download model
 $ollama->pullModel(['model' => 'llama3.2']);
 
-// Informações do modelo
+// Model information
 $info = $ollama->showModel('llama3.2');
 
-// Deletar modelo
-$ollama->deleteModel('modelo-antigo');
+// Delete model
+$ollama->deleteModel('old-model');
 ```
 
-## Tratamento de Erros
+## Error Handling
 
 ```php
 use Ollama\Exceptions\OllamaException;
 
 try {
     $response = $ollama->chat([
-        'model' => 'modelo-inexistente',
-        'messages' => [Message::user('Olá')->toArray()]
+        'model' => 'non-existent-model',
+        'messages' => [Message::user('Hello')->toArray()]
     ]);
 } catch (OllamaException $e) {
-    echo "Erro: " . $e->getMessage();
-    echo "Código: " . $e->getCode();
+    echo "Error: " . $e->getMessage();
+    echo "Code: " . $e->getCode();
 }
 ```
 
-## Configuração
+## Configuration
 
-### Opções do Cliente
+### Client Options
 
 ```php
 $ollama = new Ollama('http://localhost:11434', [
@@ -304,24 +304,24 @@ $openai = new OpenAI('http://localhost:11434/v1', 'ollama', [
 ]);
 ```
 
-## Requisitos
+## Requirements
 
 - PHP >= 5.6.0
 - ext-curl
 - ext-json
 
-## Exemplos Completos
+## Complete Examples
 
-Veja os arquivos de exemplo na pasta `examples/`:
+See example files in the `examples/` folder:
 
-- [`basic_usage.php`](examples/basic_usage.php) - Uso básico da API Ollama
-- [`openai_usage.php`](examples/openai_usage.php) - Exemplos com API OpenAI
-- [`advanced_chat.php`](examples/advanced_chat.php) - Chat avançado com tools
+- [`basic_usage.php`](examples/basic_usage.php) - Basic Ollama API usage
+- [`openai_usage.php`](examples/openai_usage.php) - OpenAI API examples
+- [`advanced_chat.php`](examples/advanced_chat.php) - Advanced chat with tools
 
-## Licença
+## License
 
-MIT License. Veja [LICENSE](LICENSE) para detalhes.
+MIT License. See [LICENSE](LICENSE) for details.
 
-## Contribuições
+## Contributions
 
-Contribuições são bem-vindas! Veja [CONTRIBUTING.md](CONTRIBUTING.md) para guidelines.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

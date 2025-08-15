@@ -5,27 +5,27 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Ollama\Ollama;
 use Ollama\Models\Message;
 
-// Configurar cliente
+// Configure client
 $client = new Ollama(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
 
-$defaultModel = 'qwen2.5:3b'; // Modelo padrão para os exemplos
-echo "=== Exemplo 1: Generate Completion ===\n";
+$defaultModel = 'qwen2.5:3b'; // Default model for examples
+echo "=== Example 1: Generate Completion ===\n";
 try {
     $response = $client->generate([
         'model' => $defaultModel,
-        'prompt' => 'Por que o céu é azul?',
+        'prompt' => 'Why is the sky blue?',
         'stream' => false
     ]);
     
-    echo "Resposta: " . $response['response'] . "\n\n";
+    echo "Response: " . $response['response'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 2: Chat Completion ===\n";
+echo "=== Example 2: Chat Completion ===\n";
 try {
     $messages = [
-        Message::user('Olá, como você está?'),
+        Message::user('Hello, how are you?'),
     ];
     
     $response = $client->chat([
@@ -34,18 +34,18 @@ try {
         'stream' => false
     ]);
     
-    echo "Resposta: " . $response['message']['content'] . "\n\n";
+    echo "Response: " . $response['message']['content'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 3: Chat com Histórico ===\n";
+echo "=== Example 3: Chat with History ===\n";
 try {
     $messages = [
-        Message::system('Você é um assistente útil que responde em português.'),
-        Message::user('Qual é a capital do Brasil?'),
-        Message::assistant('A capital do Brasil é Brasília.'),
-        Message::user('E qual é a população dessa cidade?')
+        Message::system('You are a helpful assistant that responds in English.'),
+        Message::user('What is the capital of Brazil?'),
+        Message::assistant('The capital of Brazil is Brasília.'),
+        Message::user('What is the population of that city?')
     ];
     
     $response = $client->chat([
@@ -54,17 +54,17 @@ try {
         'stream' => false
     ]);
     
-    echo "Resposta: " . $response['message']['content'] . "\n\n";
+    echo "Response: " . $response['message']['content'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 4: Streaming ===\n";
+echo "=== Example 4: Streaming ===\n";
 try {
-    echo "Resposta streaming: ";
+    echo "Streaming response: ";
     $client->generate([
         'model' => $defaultModel,
-        'prompt' => 'Conte uma piada curta',
+        'prompt' => 'Tell a short joke',
         'stream' => true
     ], function($chunk) {
         if (isset($chunk['response'])) {
@@ -73,10 +73,10 @@ try {
     });
     echo "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 5: Tool Calling ===\n";
+echo "=== Example 5: Tool Calling ===\n";
 try {
     $tools = [
         
@@ -85,7 +85,7 @@ try {
     $response = $client->chat([
         'model' => $defaultModel,
         'messages' => [
-            Message::user('Qual é o clima em São Paulo hoje?')->toArray()
+            Message::user('What is the weather in São Paulo today?')->toArray()
         ],
         'tools' => $tools,
         'stream' => false
@@ -93,49 +93,49 @@ try {
     
     echo "Tool calls: " . json_encode($response['message'], JSON_PRETTY_PRINT) . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 6: Listar Modelos ===\n";
+echo "=== Example 6: List Models ===\n";
 try {
     $models = $client->listModels();
-    echo "Modelos disponíveis:\n";
+    echo "Available models:\n";
     foreach ($models['models'] as $model) {
         echo "- " . $model['name'] . " (" . round($model['size'] / 1024 / 1024 / 1024, 2) . " GB)\n";
     }
     echo "\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 7: Embeddings ===\n";
+echo "=== Example 7: Embeddings ===\n";
 try {
     $response = $client->embeddings([
         'model' => 'all-minilm',
-        'input' => 'Este é um texto para gerar embeddings'
+        'input' => 'This is a text to generate embeddings'
     ]);
     
-    echo "Embeddings gerados: " . count($response['embeddings'][0]) . " dimensões\n";
-    echo "Primeiras 5 dimensões: " . json_encode(array_slice($response['embeddings'][0], 0, 5)) . "\n\n";
+    echo "Generated embeddings: " . count($response['embeddings'][0]) . " dimensions\n";
+    echo "First 5 dimensions: " . json_encode(array_slice($response['embeddings'][0], 0, 5)) . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 8: Informações do Modelo ===\n";
+echo "=== Example 8: Model Information ===\n";
 try {
     $info = $client->showModel($defaultModel);
-    echo "Informações do modelo:\n";
-    echo "- Família: " . (isset($info['details']['family']) ? $info['details']['family'] : 'N/A') . "\n";
-    echo "- Parâmetros: " . (isset($info['details']['parameter_size']) ? $info['details']['parameter_size'] : 'N/A') . "\n";
-    echo "- Formato: " . (isset($info['details']['format']) ? $info['details']['format'] : 'N/A') . "\n\n";
+    echo "Model information:\n";
+    echo "- Family: " . (isset($info['details']['family']) ? $info['details']['family'] : 'N/A') . "\n";
+    echo "- Parameters: " . (isset($info['details']['parameter_size']) ? $info['details']['parameter_size'] : 'N/A') . "\n";
+    echo "- Format: " . (isset($info['details']['format']) ? $info['details']['format'] : 'N/A') . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }
 
-echo "=== Exemplo 9: Versão do Ollama ===\n";
+echo "=== Example 9: Ollama Version ===\n";
 try {
     $version = $client->version();
-    echo "Versão do Ollama: " . $version['version'] . "\n\n";
+    echo "Ollama version: " . $version['version'] . "\n\n";
 } catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
+    echo "Error: " . $e->getMessage() . "\n\n";
 }

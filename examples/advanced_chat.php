@@ -8,7 +8,7 @@ use Ollama\Tools\ToolManager;
 use Ollama\Utils\ImageHelper;
 
 /**
- * Exemplo avançado: Sistema de chat interativo com tools
+ * Advanced example: Interactive chat system with tools
  */
 class ChatSystem
 {
@@ -39,7 +39,7 @@ class ChatSystem
 
     public function chat($userMessage, $model = 'qwen2.5:3b', array $images = null)
     {
-        // Adicionar mensagem do usuário
+        // Add user message
         $this->messages[] = Message::user($userMessage, $images);
 
         try {
@@ -57,16 +57,16 @@ class ChatSystem
 
             $assistantMessage = $response['message'];
 
-            // Verificar se o modelo quer usar tools
+            // Check if the model wants to use tools
             if (isset($assistantMessage['tool_calls']) && !empty($assistantMessage['tool_calls'])) {
                 return $this->handleToolCalls($assistantMessage['tool_calls'], $model);
             } else {
-                // Adicionar resposta do assistente ao histórico
+                // Add assistant response to history
                 $this->messages[] = Message::assistant($assistantMessage['content']);
                 return $assistantMessage['content'];
             }
         } catch (Exception $e) {
-            return "Erro: " . $e->getMessage();
+            return "Error: " . $e->getMessage();
         }
     }
 
@@ -78,15 +78,15 @@ class ChatSystem
             $functionName = $toolCall['function']['name'];
             $arguments = $toolCall['function']['arguments'];
 
-            // Executar a função
+            // Execute function
             $result = $this->executeFunction($functionName, $arguments, $model);
 
-            // Adicionar resultado como mensagem de tool
+            // Add result as tool message
             $this->messages[] = Message::tool($result, $functionName);
-            $results[] = "Resultado de $functionName: $result";
+            $results[] = "Result from $functionName: $result";
         }
 
-        // Fazer nova chamada para o modelo com os resultados das tools
+        // Make new call to model with tool results
         try {
             $response = $this->client->chat(array(
                 'model' => $model,
@@ -100,7 +100,7 @@ class ChatSystem
 
             return $finalMessage;
         } catch (Exception $e) {
-            return "Erro ao processar resultado das tools: " . $e->getMessage();
+            return "Error processing tool results: " . $e->getMessage();
         }
     }
 
@@ -111,7 +111,7 @@ class ChatSystem
             return $tool->execute($arguments);
         }
 
-        throw new InvalidArgumentException("Tool '$functionName' não registrada.");
+        throw new InvalidArgumentException("Tool '$functionName' not registered.");
     }
 
     private function prepareMessages()
@@ -132,40 +132,40 @@ class ChatSystem
     }
 }
 
-// Exemplo de uso
-echo "=== Sistema de Chat Interativo com Tools ===\n\n";
+// Usage example
+echo "=== Interactive Chat System with Tools ===\n\n";
 
 $chatSystem = new ChatSystem();
-$chatSystem->addSystemMessage('Você é um assistente útil que pode usar ferramentas para obter informações sobre clima, fazer cálculos e obter data/hora atual. Sempre responda em português.');
+$chatSystem->addSystemMessage('You are a helpful assistant that can use tools to get information about weather, do calculations, and get current date/time. Always respond in English.');
 
-// Simulação de conversa
+// Conversation simulation
 $conversations = array(
-    "Qual é o clima em São Paulo hoje?",
-    "Quanto é 15 + 27?",
-    "Que horas são agora?",
-    "Calcule a raiz quadrada de 144",
-    "Como está o tempo no Rio de Janeiro em Fahrenheit?",
-    "Obrigado pela ajuda!"
+    "What is the weather in São Paulo today?",
+    "What is 15 + 27?",
+    "What time is it now?",
+    "Calculate the square root of 144",
+    "How is the weather in Rio de Janeiro in Fahrenheit?",
+    "Thank you for your help!"
 );
 
 foreach ($conversations as $userInput) {
-    echo "Usuário: $userInput\n";
+    echo "User: $userInput\n";
     $response = $chatSystem->chat($userInput);
-    echo "Assistente: $response\n\n";
+    echo "Assistant: $response\n\n";
 
-    // Pequena pausa para simular conversa real
+    // Small pause to simulate real conversation
     sleep(1);
 }
 
-echo "=== Exemplo de Chat com Imagens ===\n";
+echo "=== Example Chat with Images ===\n";
 
-$response = $chatSystem->chat('O que há na imagem?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
-echo "Resposta: $response\n\n";
+$response = $chatSystem->chat('What is in the image?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
+echo "Response: $response\n\n";
 
-$response = $chatSystem->chat('Quantas pessoas há na imagem?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
-echo "Resposta: $response\n\n";
+$response = $chatSystem->chat('How many people are in the image?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
+echo "Response: $response\n\n";
 
-echo "=== Histórico da Conversa ===\n";
+echo "=== Conversation History ===\n";
 $history = $chatSystem->getConversationHistory();
 foreach ($history as $i => $message) {
     echo ($i + 1) . ". [{$message->role}]: {$message->content}\n";
