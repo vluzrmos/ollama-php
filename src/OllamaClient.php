@@ -348,7 +348,7 @@ class OllamaClient
      */
     public function getToolsForAPI()
     {
-        return $this->toolManager->getToolsForAPI();
+        return $this->toolManager->jsonSerialize();
     }
 
     /**
