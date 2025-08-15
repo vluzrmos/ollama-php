@@ -43,7 +43,7 @@ class CalculatorTool extends AbstractTool
                 'operation' => array(
                     'type' => 'string',
                     'description' => 'A operação matemática a ser realizada',
-                    'enum' => array('add', 'subtract', 'multiply', 'divide')
+                    'enum' => array('add', 'subtract', 'multiply', 'divide', 'sqrt')
                 ),
                 'a' => array(
                     'type' => 'number',
@@ -114,6 +114,11 @@ class CalculatorTool extends AbstractTool
                     throw new Exception('Divisão por zero não é permitida');
                 }
                 return $a / $b;
+            case 'sqrt':
+                if ($a < 0) {
+                    throw new Exception('Raiz quadrada de número negativo não é permitida');
+                }
+                return sqrt($a);
             default:
                 throw new Exception('Operação não suportada: ' . $operation);
         }

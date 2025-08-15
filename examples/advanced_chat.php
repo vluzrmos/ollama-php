@@ -43,15 +43,19 @@ class ChatSystem
     {
         // Adicionar mensagem do usuário
         $this->messages[] = Message::user($userMessage, $images);
-        echo json_encode(Message::user($userMessage, $images)->toArray()).PHP_EOL;
+
         try {
-            // Enviar para o modelo
-            $response = $this->client->chat(array(
+            $params = array(
                 'model' => $model,
                 'messages' => $this->prepareMessages(),
-                'tools' => $this->tools->jsonSerialize(),
                 'stream' => false
-            ));
+            );
+
+            if (!$images) {
+                $params['tools'] = $this->tools->jsonSerialize();
+            }
+
+            $response = $this->client->chat($params);
 
             $assistantMessage = $response['message'];
 
@@ -146,17 +150,21 @@ $conversations = array(
     "Obrigado pela ajuda!"
 );
 
-// foreach ($conversations as $userInput) {
-//     echo "Usuário: $userInput\n";
-//     $response = $chatSystem->chat($userInput);
-//     echo "Assistente: $response\n\n";
+foreach ($conversations as $userInput) {
+    echo "Usuário: $userInput\n";
+    $response = $chatSystem->chat($userInput);
+    echo "Assistente: $response\n\n";
 
-//     // Pequena pausa para simular conversa real
-//     sleep(1);
-// }
+    // Pequena pausa para simular conversa real
+    sleep(1);
+}
 
 echo "=== Exemplo de Chat com Imagens ===\n";
+
 $response = $chatSystem->chat('O que há na imagem?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
+echo "Resposta: $response\n\n";
+
+$response = $chatSystem->chat('Quantas pessoas há na imagem?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
 echo "Resposta: $response\n\n";
 
 echo "=== Histórico da Conversa ===\n";
