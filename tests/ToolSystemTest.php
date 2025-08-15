@@ -21,7 +21,7 @@ class ToolSystemTest extends TestCase
     public function testToolManagerInitialization()
     {
         $this->assertEmpty($this->toolManager->listTools());
-        $this->assertEquals(0, count($this->toolManager->getToolsForAPI()));
+        $this->assertEquals(0, count($this->toolManager->jsonSerialize()));
     }
 
     public function testDefaultToolsRegistration()
