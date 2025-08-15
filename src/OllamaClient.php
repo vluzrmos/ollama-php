@@ -4,6 +4,7 @@ namespace Ollama;
 
 use Ollama\Exceptions\OllamaException;
 use Ollama\Http\HttpClient;
+use Ollama\Tools\ToolManager;
 
 /**
  * Cliente principal para a API do Ollama
@@ -21,6 +22,11 @@ class OllamaClient
     private $baseUrl;
 
     /**
+     * @var ToolManager
+     */
+    private $toolManager;
+
+    /**
      * @param string $baseUrl URL base do servidor Ollama (ex: http://localhost:11434)
      * @param array $options Opções adicionais para configuração
      */
@@ -28,6 +34,12 @@ class OllamaClient
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->httpClient = new HttpClient($this->baseUrl, $options);
+        $this->toolManager = new ToolManager();
+        
+        // Registra tools padrão se habilitado nas opções
+        if (!isset($options['disable_default_tools']) || !$options['disable_default_tools']) {
+            $this->toolManager->registerDefaultTools();
+        }
     }
 
     /**
@@ -284,5 +296,79 @@ class OllamaClient
     public function getHttpClient()
     {
         return $this->httpClient;
+    }
+
+    /**
+     * Obtém o gerenciador de tools
+     *
+     * @return ToolManager
+     */
+    public function getToolManager()
+    {
+        return $this->toolManager;
+    }
+
+    /**
+     * Registra uma nova tool
+     *
+     * @param \Ollama\Tools\ToolInterface $tool
+     * @return void
+     */
+    public function registerTool($tool)
+    {
+        $this->toolManager->registerTool($tool);
+    }
+
+    /**
+     * Executa uma tool pelo nome
+     *
+     * @param string $toolName
+     * @param array $arguments
+     * @return string
+     */
+    public function executeTool($toolName, array $arguments)
+    {
+        return $this->toolManager->executeTool($toolName, $arguments);
+    }
+
+    /**
+     * Lista todas as tools disponíveis
+     *
+     * @return array
+     */
+    public function listAvailableTools()
+    {
+        return $this->toolManager->listTools();
+    }
+
+    /**
+     * Obtém tools no formato esperado pela API
+     *
+     * @return array
+     */
+    public function getToolsForAPI()
+    {
+        return $this->toolManager->getToolsForAPI();
+    }
+
+    /**
+     * Gera uma chat completion com suporte a tools
+     *
+     * @param array $params Parâmetros da requisição
+     * @param callable|null $streamCallback Callback para streaming (opcional)
+     * @param bool $enableTools Se deve incluir tools na requisição
+     * @return array
+     * @throws OllamaException
+     */
+    public function chatWithTools(array $params, $streamCallback = null, $enableTools = true)
+    {
+        if ($enableTools) {
+            $tools = $this->getToolsForAPI();
+            if (!empty($tools)) {
+                $params['tools'] = $tools;
+            }
+        }
+
+        return $this->chat($params, $streamCallback);
     }
 }

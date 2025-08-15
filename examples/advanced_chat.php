@@ -4,7 +4,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Ollama\OllamaClient;
 use Ollama\Models\Message;
-use Ollama\Models\Tool;
+use Ollama\Tools\ToolManager;
+use Ollama\Utils\ImageHelper;
 
 /**
  * Exemplo avançado: Sistema de chat interativo com tools
@@ -13,37 +14,24 @@ class ChatSystem
 {
     private $client;
     private $messages;
+
+    /**
+     * @var ToolManager
+     */
     private $tools;
 
     public function __construct()
     {
-        $this->client = new OllamaClient('http://localhost:11434');
+        $this->client = new OllamaClient(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
         $this->messages = array();
         $this->setupTools();
     }
 
     private function setupTools()
     {
-        $this->tools = array(
-            Tool::weather()->toArray(),
-            Tool::create(
-                'calculate',
-                'Realizar cálculos matemáticos',
-                array(
-                    'expression' => array(
-                        'type' => 'string',
-                        'description' => 'Expressão matemática para calcular'
-                    )
-                ),
-                array('expression')
-            )->toArray(),
-            Tool::create(
-                'get_time',
-                'Obter data e hora atual',
-                array(),
-                array()
-            )->toArray()
-        );
+        $this->tools = new ToolManager();
+
+        $this->tools->registerDefaultTools();
     }
 
     public function addSystemMessage($content)
@@ -51,17 +39,17 @@ class ChatSystem
         $this->messages[] = Message::system($content);
     }
 
-    public function chat($userMessage)
+    public function chat($userMessage, $model = 'qwen2.5:3b', array $images = null)
     {
         // Adicionar mensagem do usuário
-        $this->messages[] = Message::user($userMessage);
-
+        $this->messages[] = Message::user($userMessage, $images);
+        echo json_encode(Message::user($userMessage, $images)->toArray()).PHP_EOL;
         try {
             // Enviar para o modelo
             $response = $this->client->chat(array(
-                'model' => 'llama3.2',
+                'model' => $model,
                 'messages' => $this->prepareMessages(),
-                'tools' => $this->tools,
+                'tools' => $this->tools->jsonSerialize(),
                 'stream' => false
             ));
 
@@ -69,19 +57,18 @@ class ChatSystem
 
             // Verificar se o modelo quer usar tools
             if (isset($assistantMessage['tool_calls']) && !empty($assistantMessage['tool_calls'])) {
-                return $this->handleToolCalls($assistantMessage['tool_calls']);
+                return $this->handleToolCalls($assistantMessage['tool_calls'], $model);
             } else {
                 // Adicionar resposta do assistente ao histórico
                 $this->messages[] = Message::assistant($assistantMessage['content']);
                 return $assistantMessage['content'];
             }
-
         } catch (Exception $e) {
             return "Erro: " . $e->getMessage();
         }
     }
 
-    private function handleToolCalls($toolCalls)
+    private function handleToolCalls($toolCalls, $model)
     {
         $results = array();
 
@@ -90,7 +77,7 @@ class ChatSystem
             $arguments = $toolCall['function']['arguments'];
 
             // Executar a função
-            $result = $this->executeFunction($functionName, $arguments);
+            $result = $this->executeFunction($functionName, $arguments, $model);
 
             // Adicionar resultado como mensagem de tool
             $this->messages[] = Message::tool($result, $functionName);
@@ -100,7 +87,7 @@ class ChatSystem
         // Fazer nova chamada para o modelo com os resultados das tools
         try {
             $response = $this->client->chat(array(
-                'model' => 'llama3.2',
+                'model' => $model,
                 'messages' => $this->prepareMessages(),
                 'tools' => $this->tools,
                 'stream' => false
@@ -108,9 +95,8 @@ class ChatSystem
 
             $finalMessage = $response['message']['content'];
             $this->messages[] = Message::assistant($finalMessage);
-            
-            return $finalMessage;
 
+            return $finalMessage;
         } catch (Exception $e) {
             return "Erro ao processar resultado das tools: " . $e->getMessage();
         }
@@ -118,64 +104,17 @@ class ChatSystem
 
     private function executeFunction($functionName, $arguments)
     {
-        switch ($functionName) {
-            case 'get_weather':
-                return $this->getWeather($arguments['city'], isset($arguments['format']) ? $arguments['format'] : 'celsius');
-                
-            case 'calculate':
-                return $this->calculate($arguments['expression']);
-                
-            case 'get_time':
-                return $this->getTime();
-                
-            default:
-                return "Função desconhecida: $functionName";
+        if ($this->tools->hasTool($functionName)) {
+            $tool = $this->tools->getTool($functionName);
+            return $tool->execute($arguments);
         }
-    }
 
-    private function getWeather($city, $format = 'celsius')
-    {
-        // Simulação de API de clima
-        $weatherData = array(
-            'São Paulo' => array('temp' => 23, 'condition' => 'ensolarado'),
-            'Rio de Janeiro' => array('temp' => 28, 'condition' => 'parcialmente nublado'),
-            'Brasília' => array('temp' => 25, 'condition' => 'nublado')
-        );
-
-        $city = ucwords(strtolower($city));
-        if (isset($weatherData[$city])) {
-            $temp = $weatherData[$city]['temp'];
-            if ($format === 'fahrenheit') {
-                $temp = ($temp * 9/5) + 32;
-            }
-            return "O clima em $city está {$weatherData[$city]['condition']} com temperatura de {$temp}°" . 
-                   ($format === 'celsius' ? 'C' : 'F');
-        }
-        
-        return "Dados meteorológicos não disponíveis para $city";
-    }
-
-    private function calculate($expression)
-    {
-        // Sanitizar expressão para segurança
-        $expression = preg_replace('/[^0-9+\-*\/\(\)\.\s]/', '', $expression);
-        
-        try {
-            $result = eval("return $expression;");
-            return "O resultado de '$expression' é: $result";
-        } catch (Exception $e) {
-            return "Erro no cálculo: expressão inválida";
-        }
-    }
-
-    private function getTime()
-    {
-        return "Data e hora atual: " . date('d/m/Y H:i:s');
+        throw new InvalidArgumentException("Tool '$functionName' não registrada.");
     }
 
     private function prepareMessages()
     {
-        return array_map(function($message) {
+        return array_map(function ($message) {
             return $message->toArray();
         }, $this->messages);
     }
@@ -207,14 +146,18 @@ $conversations = array(
     "Obrigado pela ajuda!"
 );
 
-foreach ($conversations as $userInput) {
-    echo "Usuário: $userInput\n";
-    $response = $chatSystem->chat($userInput);
-    echo "Assistente: $response\n\n";
-    
-    // Pequena pausa para simular conversa real
-    sleep(1);
-}
+// foreach ($conversations as $userInput) {
+//     echo "Usuário: $userInput\n";
+//     $response = $chatSystem->chat($userInput);
+//     echo "Assistente: $response\n\n";
+
+//     // Pequena pausa para simular conversa real
+//     sleep(1);
+// }
+
+echo "=== Exemplo de Chat com Imagens ===\n";
+$response = $chatSystem->chat('O que há na imagem?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
+echo "Resposta: $response\n\n";
 
 echo "=== Histórico da Conversa ===\n";
 $history = $chatSystem->getConversationHistory();

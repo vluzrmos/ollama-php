@@ -1,6 +1,6 @@
 # Ollama PHP 5.6 Client
 
-Um cliente PHP 5.6 para a API do Ollama, permitindo integração com modelos de linguagem local.
+Um cliente PHP 5.6 para a API do Ollama, permitindo integração com modelos de linguagem local. Agora com **Sistema de Tools** integrado para funcionalidades avançadas.
 
 ## Requisitos
 
@@ -12,6 +12,115 @@ Um cliente PHP 5.6 para a API do Ollama, permitindo integração com modelos de 
 
 ```bash
 composer require vluzr/ollama-php56
+```
+
+## Funcionalidades Principais
+
+- ✅ Generate completion
+- ✅ Chat completion 
+- ✅ List models
+- ✅ Show model information
+- ✅ Pull model
+- ✅ Push model
+- ✅ Create model
+- ✅ Delete model
+- ✅ Copy model
+- ✅ Generate embeddings
+- ✅ List running models
+- ✅ Version information
+- ✅ **Sistema de Tools integrado**
+- ✅ Tool calling nativo
+- ✅ Tools personalizadas
+- ✅ Structured outputs
+- ✅ Image support (multimodal)
+- ✅ API Token authentication
+- ✅ OpenAI API compatibility
+
+## Novo Sistema de Tools
+
+### Tools Disponíveis por Padrão
+
+- **WeatherTool**: Informações de clima
+- **CalculatorTool**: Operações matemáticas
+- **WebSearchTool**: Simulação de busca web
+- **DateTimeTool**: Operações com data/hora
+
+### Uso Básico com Tools
+
+```php
+<?php
+use Ollama\OllamaClient;
+
+// Cliente com tools padrão habilitadas
+$client = new OllamaClient('http://localhost:11434');
+
+// Listar tools disponíveis
+$tools = $client->listAvailableTools();
+// Output: ['get_weather', 'calculator', 'web_search', 'datetime_operations']
+
+// Executar tool diretamente
+$result = $client->executeTool('calculator', [
+    'operation' => 'multiply',
+    'a' => 15,
+    'b' => 7
+]);
+// Output: {"operation":"multiply","a":15,"b":7,"result":105}
+
+// Chat com tools automáticas
+$response = $client->chatWithTools([
+    'model' => 'llama3.2',
+    'messages' => [
+        ['role' => 'user', 'content' => 'Quanto é 25 x 8 e qual o clima em São Paulo?']
+    ]
+]);
+```
+
+### Criando Tools Personalizadas
+
+```php
+use Ollama\Tools\AbstractTool;
+
+class MinhaToolPersonalizada extends AbstractTool
+{
+    public function getName()
+    {
+        return 'minha_tool';
+    }
+
+    public function getDescription()
+    {
+        return 'Minha tool personalizada';
+    }
+
+    public function getParametersSchema()
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'texto' => [
+                    'type' => 'string',
+                    'description' => 'Texto para processar'
+                ]
+            ],
+            'required' => ['texto']
+        ];
+    }
+
+    public function execute(array $arguments)
+    {
+        $texto = isset($arguments['texto']) ? $arguments['texto'] : '';
+        $resultado = strtoupper($texto);
+        
+        return json_encode([
+            'original' => $texto,
+            'resultado' => $resultado
+        ]);
+    }
+}
+
+// Registrar e usar
+$client->registerTool(new MinhaToolPersonalizada());
+$result = $client->executeTool('minha_tool', ['texto' => 'hello world']);
 ```
 
 ## Uso Básico
@@ -127,26 +236,6 @@ $embeddings = $client->embeddings([
 ]);
 ```
 
-## Funcionalidades Suportadas
-
-- ✅ Generate completion
-- ✅ Chat completion 
-- ✅ List models
-- ✅ Show model information
-- ✅ Pull model
-- ✅ Push model
-- ✅ Create model
-- ✅ Delete model
-- ✅ Copy model
-- ✅ Generate embeddings
-- ✅ List running models
-- ✅ Version information
-- ✅ Tool calling
-- ✅ Structured outputs
-- ✅ Image support (multimodal)
-- ✅ API Token authentication
-- ✅ OpenAI API compatibility
-
 ## Compatibilidade
 
 Este cliente é compatível com:
@@ -154,6 +243,12 @@ Este cliente é compatível com:
 - **OpenAI API** 
 - **Qualquer API compatível com OpenAI** (Anthropic, etc.)
 - **Servidores Ollama com autenticação personalizada**
+
+## Documentação Detalhada
+
+- **[Sistema de Tools](docs/TOOLS.md)** - Guia completo sobre tools
+- **[Exemplos](examples/)** - Códigos de exemplo
+- **[API Documentation](docs/API.md)** - Referência completa da API
 
 ## Exemplos Avançados
 

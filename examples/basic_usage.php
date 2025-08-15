@@ -8,12 +8,13 @@ use Ollama\Models\Tool;
 use Ollama\Utils\ImageHelper;
 
 // Configurar cliente
-$client = new OllamaClient('http://localhost:11434');
+$client = new OllamaClient(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
 
+$defaultModel = 'qwen2.5:3b'; // Modelo padrão para os exemplos
 echo "=== Exemplo 1: Generate Completion ===\n";
 try {
     $response = $client->generate([
-        'model' => 'llama3.2',
+        'model' => $defaultModel,
         'prompt' => 'Por que o céu é azul?',
         'stream' => false
     ]);
@@ -30,7 +31,7 @@ try {
     ];
     
     $response = $client->chat([
-        'model' => 'llama3.2',
+        'model' => $defaultModel,
         'messages' => array_map(function($msg) { return $msg->toArray(); }, $messages),
         'stream' => false
     ]);
@@ -50,7 +51,7 @@ try {
     ];
     
     $response = $client->chat([
-        'model' => 'llama3.2',
+        'model' => $defaultModel,
         'messages' => array_map(function($msg) { return $msg->toArray(); }, $messages),
         'stream' => false
     ]);
@@ -64,7 +65,7 @@ echo "=== Exemplo 4: Streaming ===\n";
 try {
     echo "Resposta streaming: ";
     $client->generate([
-        'model' => 'llama3.2',
+        'model' => $defaultModel,
         'prompt' => 'Conte uma piada curta',
         'stream' => true
     ], function($chunk) {
@@ -80,11 +81,11 @@ try {
 echo "=== Exemplo 5: Tool Calling ===\n";
 try {
     $tools = [
-        Tool::weather()->toArray()
+        
     ];
     
     $response = $client->chat([
-        'model' => 'llama3.2',
+        'model' => $defaultModel,
         'messages' => [
             Message::user('Qual é o clima em São Paulo hoje?')->toArray()
         ],
@@ -124,8 +125,8 @@ try {
 
 echo "=== Exemplo 8: Informações do Modelo ===\n";
 try {
-    $info = $client->showModel('llama3.2');
-    echo "Informações do modelo llama3.2:\n";
+    $info = $client->showModel($defaultModel);
+    echo "Informações do modelo:\n";
     echo "- Família: " . (isset($info['details']['family']) ? $info['details']['family'] : 'N/A') . "\n";
     echo "- Parâmetros: " . (isset($info['details']['parameter_size']) ? $info['details']['parameter_size'] : 'N/A') . "\n";
     echo "- Formato: " . (isset($info['details']['format']) ? $info['details']['format'] : 'N/A') . "\n\n";
@@ -140,28 +141,3 @@ try {
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage() . "\n\n";
 }
-
-/* 
-echo "=== Exemplo 10: Chat com Imagem (descomente se tiver uma imagem) ===\n";
-try {
-    // Certifique-se de que o arquivo existe
-    $imagePath = 'exemplo.jpg';
-    if (file_exists($imagePath)) {
-        $encodedImage = ImageHelper::encodeImage($imagePath);
-        
-        $response = $client->chat([
-            'model' => 'llava',
-            'messages' => [
-                Message::user('O que há nesta imagem?', [$encodedImage])->toArray()
-            ],
-            'stream' => false
-        ]);
-        
-        echo "Descrição da imagem: " . $response['message']['content'] . "\n\n";
-    } else {
-        echo "Arquivo de imagem não encontrado para teste\n\n";
-    }
-} catch (Exception $e) {
-    echo "Erro: " . $e->getMessage() . "\n\n";
-}
-*/

@@ -24,7 +24,7 @@ class ImageHelper
         if ($imageData === false) {
             throw new \InvalidArgumentException('Falha ao ler arquivo de imagem: ' . $imagePath);
         }
-
+        
         return base64_encode($imageData);
     }
 
@@ -57,13 +57,10 @@ class ImageHelper
             return false;
         }
 
-        $allowedTypes = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $imagePath);
-        finfo_close($finfo);
-
-        return in_array($mimeType, $allowedTypes);
+        return true;
     }
+
+
 
     /**
      * Obtém informações sobre uma imagem

@@ -169,7 +169,7 @@ class HttpClient
      * Realiza uma requisição PUT
      *
      * @param string $endpoint
-     * @param string $data
+     * @param array|string $data
      * @param array $headers
      * @return array
      * @throws OllamaException
@@ -241,16 +241,20 @@ class HttpClient
             $defaultHeaders[] = 'Authorization: Bearer ' . $this->apiToken;
         }
         
-        // Preparar dados se necessário
+        // Preparar dados se necessário - sempre enviar como JSON
         if ($data !== null) {
-            if (is_array($data)) {
-                $data = json_encode($data);
-                if ($data === false) {
+            if (is_array($data) || is_object($data)) {
+                $jsonData = json_encode($data);
+                
+                if ($jsonData === false) {
                     throw new OllamaException('Falha ao codificar dados JSON');
                 }
-                $defaultHeaders[] = 'Content-Type: application/json';
+
+                $data = $jsonData;
             }
             
+            // Sempre definir Content-Type como JSON quando há dados
+            $defaultHeaders[] = 'Content-Type: application/json';
             $curlOptions[CURLOPT_POSTFIELDS] = $data;
         }
 
