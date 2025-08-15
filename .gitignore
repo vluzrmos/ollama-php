@@ -1,0 +1,33 @@
+# Vendor files
+/vendor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+
+# Test coverage
+/coverage/
+
+# Build artifacts
+/build/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Composer lock for library projects
+composer.lock
