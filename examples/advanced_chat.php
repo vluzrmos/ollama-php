@@ -159,10 +159,10 @@ foreach ($conversations as $userInput) {
 
 echo "=== Example Chat with Images ===\n";
 
-$response = $chatSystem->chat('What is in the image?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
+$response = $chatSystem->chat('What is in the image?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.jpg')]);
 echo "Response: $response\n\n";
 
-$response = $chatSystem->chat('How many people are in the image?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.png')]);
+$response = $chatSystem->chat('How many people are in the image?', 'qwen2.5vl:3b', [ImageHelper::encodeImage(__DIR__.'/sample.jpg')]);
 echo "Response: $response\n\n";
 
 echo "=== Conversation History ===\n";

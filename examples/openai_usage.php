@@ -60,7 +60,7 @@ try {
 echo "=== OpenAI Example 4: Chat with Image (Llava) ===\n";
 try {
     // Example with base64 image (replace with a real image)
-    $imageBase64 = ImageHelper::encodeImageUrl(__DIR__ . '/sample.png');
+    $imageBase64 = ImageHelper::encodeImageUrl(__DIR__ . '/sample.jpg');
     
     echo "Base64 image: " . substr($imageBase64, 0, 30) . "...\n"; // Just for demonstration
 
