@@ -164,6 +164,146 @@ $response = $openai->chatCompletions([
 ]);
 ```
 
+### Advanced Tool System
+
+This library provides a comprehensive tool system for creating and executing custom tools with the `ToolManager` class.
+
+#### Creating Custom Tools
+
+Create tools by implementing the `ToolInterface` or extending `AbstractTool`:
+
+```php
+<?php
+use Vluzrmos\Ollama\Tools\AbstractTool;
+
+class CalculatorTool extends AbstractTool
+{
+    public function getName()
+    {
+        return 'calculator';
+    }
+
+    public function getDescription()
+    {
+        return 'Performs basic mathematical operations';
+    }
+
+    public function getParametersSchema()
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'operation' => [
+                    'type' => 'string',
+                    'enum' => ['add', 'subtract', 'multiply', 'divide']
+                ],
+                'a' => ['type' => 'number'],
+                'b' => ['type' => 'number']
+            ],
+            'required' => ['operation', 'a', 'b']
+        ];
+    }
+
+    public function execute(array $arguments)
+    {
+        $a = $arguments['a'];
+        $b = $arguments['b'];
+        $operation = $arguments['operation'];
+        
+        switch ($operation) {
+            case 'add': return json_encode(['result' => $a + $b]);
+            case 'subtract': return json_encode(['result' => $a - $b]);
+            case 'multiply': return json_encode(['result' => $a * $b]);
+            case 'divide': 
+                if ($b == 0) return json_encode(['error' => 'Division by zero']);
+                return json_encode(['result' => $a / $b]);
+        }
+    }
+}
+```
+
+#### Using Tool Manager
+
+```php
+<?php
+use Vluzrmos\Ollama\Tools\ToolManager;
+
+// Create and register tools
+$toolManager = new ToolManager();
+$toolManager->registerTool(new CalculatorTool());
+
+// Make API call with tools
+$response = $openai->chatCompletions([
+    'model' => 'llama3.2',
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is 15 + 27?']
+    ],
+    'tools' => $toolManager->toArray()
+]);
+
+// Handle tool calls from response
+if (isset($response['choices'][0]['message']['tool_calls'])) {
+    $toolCalls = $response['choices'][0]['message']['tool_calls'];
+    
+    // Execute all tool calls
+    $results = $toolManager->executeToolCalls($toolCalls);
+    
+    // Convert results to message format
+    $toolMessages = $toolManager->toolCallResultsToMessages($results);
+    
+    // Send results back to model
+    $messages = [
+        ['role' => 'user', 'content' => 'What is 15 + 27?'],
+        $response['choices'][0]['message'], // Original response with tool_calls
+        ...$toolMessages // Tool results
+    ];
+    
+    $finalResponse = $openai->chatCompletions([
+        'model' => 'llama3.2',
+        'messages' => $messages
+    ]);
+    
+    echo $finalResponse['choices'][0]['message']['content'];
+}
+```
+
+#### Tool Call Execution Methods
+
+The `ToolManager` provides several methods for handling tool calls:
+
+- `executeToolCalls($toolCalls)` - Executes multiple tool calls and returns results
+- `toolCallResultsToMessages($results)` - Converts tool results to API message format
+- `registerTool($tool)` - Registers a new tool
+- `listTools()` - Lists all registered tool names
+- `getStats()` - Gets statistics about registered tools
+
+#### Error Handling in Tools
+
+```php
+<?php
+// Tool execution handles errors gracefully
+$toolCalls = [
+    [
+        'id' => 'call_001',
+        'type' => 'function',
+        'function' => [
+            'name' => 'non_existent_tool',
+            'arguments' => '{}'
+        ]
+    ]
+];
+
+$results = $toolManager->executeToolCalls($toolCalls);
+
+foreach ($results as $result) {
+    if ($result['success']) {
+        echo "Tool executed successfully: " . $result['result'];
+    } else {
+        echo "Tool execution failed: " . $result['error'];
+    }
+}
+```
+
 ### JSON Mode
 
 ```php
@@ -325,6 +465,15 @@ See example files in the `examples/` folder:
 - [`basic_usage.php`](examples/basic_usage.php) - Basic Ollama API usage
 - [`openai_usage.php`](examples/openai_usage.php) - OpenAI API examples
 - [`advanced_chat.php`](examples/advanced_chat.php) - Advanced chat with tools
+- [`tool_execution_demo.php`](examples/tool_execution_demo.php) - Comprehensive tool system demonstration
+- [`simple_tool_test.php`](examples/simple_tool_test.php) - Simple tool execution test
+
+### Tool Examples
+
+Tool implementations can be found in `examples/tools/`:
+
+- [`CalculatorTool.php`](examples/tools/CalculatorTool.php) - Mathematical operations tool
+- [`WeatherTool.php`](examples/tools/WeatherTool.php) - Weather information tool (mock)
 
 ## Testing
 Build the docker image and run tests:
