@@ -67,68 +67,7 @@ class SimpleToolsTest
         
         $tools = $this->toolManager->listTools();
         $this->assert(empty($tools), "ToolManager inicia vazio");
-        $this->assert(count($this->toolManager->getToolsForAPI()) === 0, "Nenhuma tool na API inicialmente");
-    }
-
-    private function testDefaultToolsRegistration()
-    {
-        echo "\n2. Testando registro de tools padrão...\n";
-        
-        $this->toolManager->registerDefaultTools();
-        $tools = $this->toolManager->listTools();
-        
-        $this->assert(in_array('get_weather', $tools), "WeatherTool registrada");
-        $this->assert(in_array('calculator', $tools), "CalculatorTool registrada");
-        $this->assert(in_array('web_search', $tools), "WebSearchTool registrada");
-        $this->assert(in_array('datetime_operations', $tools), "DateTimeTool registrada");
-        $this->assert(count($tools) === 4, "4 tools padrão registradas");
-    }
-
-    private function testCalculatorOperations()
-    {
-        echo "\n3. Testando operações da CalculatorTool...\n";
-        
-        // Teste adição
-        $result = json_decode($this->toolManager->executeTool('calculator', array(
-            'operation' => 'add',
-            'a' => 10,
-            'b' => 5
-        )), true);
-        $this->assert($result['result'] == 15, "Adição 10 + 5 = 15");
-        
-        // Teste multiplicação
-        $result = json_decode($this->toolManager->executeTool('calculator', array(
-            'operation' => 'multiply',
-            'a' => 6,
-            'b' => 7
-        )), true);
-        $this->assert($result['result'] == 42, "Multiplicação 6 × 7 = 42");
-        
-        // Teste divisão por zero
-        $result = json_decode($this->toolManager->executeTool('calculator', array(
-            'operation' => 'divide',
-            'a' => 10,
-            'b' => 0
-        )), true);
-        $this->assert(isset($result['error']), "Divisão por zero retorna erro");
-    }
-
-    private function testWeatherTool()
-    {
-        echo "\n4. Testando WeatherTool...\n";
-        
-        $result = json_decode($this->toolManager->executeTool('get_weather', array(
-            'city' => 'São Paulo',
-            'format' => 'celsius'
-        )), true);
-        
-        $this->assert($result['city'] === 'São Paulo', "Cidade retornada corretamente");
-        $this->assert(isset($result['temperature']), "Temperatura presente na resposta");
-        $this->assert(isset($result['condition']), "Condição climática presente");
-        
-        // Teste sem parâmetros obrigatórios
-        $result = json_decode($this->toolManager->executeTool('get_weather', array()), true);
-        $this->assert(isset($result['error']), "Erro quando cidade não informada");
+        $this->assert(count($this->toolManager->jsonSerialize()) === 0, "Nenhuma tool na API inicialmente");
     }
 
     private function testCustomTool()

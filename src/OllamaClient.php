@@ -35,11 +35,6 @@ class OllamaClient
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->httpClient = new HttpClient($this->baseUrl, $options);
         $this->toolManager = new ToolManager();
-        
-        // Registra tools padrão se habilitado nas opções
-        if (!isset($options['disable_default_tools']) || !$options['disable_default_tools']) {
-            $this->toolManager->registerDefaultTools();
-        }
     }
 
     /**

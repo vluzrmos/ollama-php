@@ -128,9 +128,6 @@ use Ollama\Tools\ToolManager;
 
 $toolManager = new ToolManager();
 
-// Registrar tools padrão
-$toolManager->registerDefaultTools();
-
 // Registrar tool personalizada
 $toolManager->registerTool(new MinhaToolPersonalizada());
 

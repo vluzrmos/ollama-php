@@ -30,8 +30,6 @@ class ChatSystem
     private function setupTools()
     {
         $this->tools = new ToolManager();
-
-        $this->tools->registerDefaultTools();
     }
 
     public function addSystemMessage($content)

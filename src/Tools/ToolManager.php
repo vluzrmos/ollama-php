@@ -128,19 +128,6 @@ class ToolManager implements JsonSerializable
     }
 
     /**
-     * Registra tools padrão do sistema
-     *
-     * @return void
-     */
-    public function registerDefaultTools()
-    {
-        $this->registerTool(new WeatherTool());
-        $this->registerTool(new CalculatorTool());
-        $this->registerTool(new WebSearchTool());
-        $this->registerTool(new DateTimeTool());
-    }
-
-    /**
      * Obtém estatísticas sobre as tools registradas
      *
      * @return array
