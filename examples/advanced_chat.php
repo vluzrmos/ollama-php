@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Ollama\OllamaClient;
+use Ollama\Ollama;
 use Ollama\Models\Message;
 use Ollama\Tools\ToolManager;
 use Ollama\Utils\ImageHelper;
@@ -22,7 +22,7 @@ class ChatSystem
 
     public function __construct()
     {
-        $this->client = new OllamaClient(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
+        $this->client = new Ollama(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
         $this->messages = array();
         $this->setupTools();
     }

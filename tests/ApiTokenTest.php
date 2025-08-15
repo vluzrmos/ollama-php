@@ -3,14 +3,14 @@
 namespace Ollama\Tests;
 
 use PHPUnit_Framework_TestCase;
-use Ollama\OllamaClient;
+use Ollama\Ollama;
 use Ollama\Http\HttpClient;
 
 class ApiTokenTest extends PHPUnit_Framework_TestCase
 {
     public function testTokenInConstructor()
     {
-        $client = new OllamaClient('http://localhost:11434', array(
+        $client = new Ollama('http://localhost:11434', array(
             'api_token' => 'test-token'
         ));
 
@@ -19,7 +19,7 @@ class ApiTokenTest extends PHPUnit_Framework_TestCase
 
     public function testSetApiToken()
     {
-        $client = new OllamaClient('http://localhost:11434');
+        $client = new Ollama('http://localhost:11434');
         
         $this->assertNull($client->getApiToken());
         
@@ -50,7 +50,7 @@ class ApiTokenTest extends PHPUnit_Framework_TestCase
 
     public function testOpenAiCompatibility()
     {
-        $client = new OllamaClient('https://api.openai.com/v1', array(
+        $client = new Ollama('https://api.openai.com/v1', array(
             'api_token' => 'sk-fake-openai-token'
         ));
 
@@ -59,7 +59,7 @@ class ApiTokenTest extends PHPUnit_Framework_TestCase
 
     public function testDynamicTokenChange()
     {
-        $client = new OllamaClient('http://localhost:11434', array(
+        $client = new Ollama('http://localhost:11434', array(
             'api_token' => 'initial-token'
         ));
 

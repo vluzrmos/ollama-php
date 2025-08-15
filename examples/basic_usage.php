@@ -2,11 +2,11 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Ollama\OllamaClient;
+use Ollama\Ollama;
 use Ollama\Models\Message;
 
 // Configurar cliente
-$client = new OllamaClient(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
+$client = new Ollama(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
 
 $defaultModel = 'qwen2.5:3b'; // Modelo padrão para os exemplos
 echo "=== Exemplo 1: Generate Completion ===\n";

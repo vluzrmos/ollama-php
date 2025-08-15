@@ -4,12 +4,13 @@ namespace Ollama;
 
 use Ollama\Exceptions\OllamaException;
 use Ollama\Http\HttpClient;
+use Ollama\Models\Model;
 use Ollama\Tools\ToolManager;
 
 /**
  * Cliente principal para a API do Ollama
  */
-class OllamaClient
+class Ollama
 {
     /**
      * @var HttpClient
@@ -71,6 +72,8 @@ class OllamaClient
     {
         $endpoint = '/api/generate';
         
+        $this->parseModelFromParams($params);
+
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
             return $this->httpClient->postStream($endpoint, $params, $streamCallback);
         }
@@ -89,12 +92,40 @@ class OllamaClient
     public function chat(array $params, $streamCallback = null)
     {
         $endpoint = '/api/chat';
+
+        $this->parseModelFromParams($params);
         
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
             return $this->httpClient->postStream($endpoint, $params, $streamCallback);
         }
         
         return $this->httpClient->post($endpoint, $params);
+    }
+
+    /**
+     * Extrai o modelo dos parâmetros e o define no objeto Model
+     *
+     * @param array $params Parâmetros da requisição
+     */
+    private function parseModelFromParams(array &$params)
+    {
+        if (!empty($params['model']) && $params['model'] instanceof Model) {
+            $model= $params['model'];
+            $params['model'] = $model->getName();
+            $params['options'] = (object) $model->getOptions();
+            
+            foreach ($model->getParameters() as $key => $value) {
+                if (isset($params[$key])) {
+                    continue; // Já existe no array
+                }
+
+                if (is_array($value)) {
+                    $params[$key] = (object) $value;
+                } else {
+                    $params[$key] = $value;
+                }
+            }
+        }
     }
 
     /**
@@ -223,6 +254,8 @@ class OllamaClient
      */
     public function embeddings(array $params)
     {
+        $this->parseModelFromParams($params);
+
         return $this->httpClient->post('/api/embed', $params);
     }
 

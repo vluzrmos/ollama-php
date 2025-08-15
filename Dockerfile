@@ -12,8 +12,8 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-COPY . /app
+#COPY . /app
 
-RUN composer install --no-dev --optimize-autoloader
+#RUN composer install --no-dev --optimize-autoloader
 
 CMD ["php", "examples/advanced_chat.php"]

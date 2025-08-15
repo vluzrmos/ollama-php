@@ -33,9 +33,9 @@ class HttpClient
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->defaultOptions = array_merge(array(
-            'timeout' => 60,
-            'connect_timeout' => 10,
-            'user_agent' => 'Ollama-PHP56/1.0',
+            'timeout' => 300,
+            'connect_timeout' => 30,
+            'user_agent' => 'Ollama/1.0',
             'verify_ssl' => true
         ), $options);
         
@@ -136,8 +136,18 @@ class HttpClient
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_WRITEFUNCTION => function($ch, $data) use ($callback) {
                 $lines = explode("\n", $data);
+
                 foreach ($lines as $line) {
                     $line = trim($line);
+
+                    if(mb_substr($line, 0, 12) === 'data: [DONE]') {
+                        return strlen($data);
+                    }
+
+                    if (mb_substr($line, 0, 6) === 'data: ') {
+                        $line = mb_substr($line, 6);
+                    }
+
                     if (!empty($line)) {
                         $decoded = json_decode($line, true);
                         if ($decoded !== null) {

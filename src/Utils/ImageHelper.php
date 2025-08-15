@@ -45,6 +45,28 @@ class ImageHelper
         return $encodedImages;
     }
 
+    public static function encodeImageUrl($imagePath)
+    {
+        $data = static::encodeImage($imagePath);
+        $info = static::getImageInfo($imagePath);
+
+        if ($info === false) {
+            throw new \InvalidArgumentException('Não foi possível obter informações da imagem: ' . $imagePath);
+        }
+
+        return 'data:' . $info['mime'] . ';base64,' . $data;
+    }
+
+    public static function encodeImagesUrl(array $imagesPaths)
+    {
+        $encodedImages = array();
+
+        foreach ($imagesPaths as $imagePath) {
+            $encodedImages[] = static::encodeImageUrl($imagePath);
+        }
+
+        return $encodedImages;
+    }
     /**
      * Valida se um arquivo é uma imagem suportada
      *
