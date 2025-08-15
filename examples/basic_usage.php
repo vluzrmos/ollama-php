@@ -4,8 +4,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Ollama\OllamaClient;
 use Ollama\Models\Message;
-use Ollama\Models\Tool;
-use Ollama\Utils\ImageHelper;
 
 // Configurar cliente
 $client = new OllamaClient(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
