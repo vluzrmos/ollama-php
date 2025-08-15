@@ -1,65 +1,65 @@
-# Contribuindo
+# Contributing
 
-Obrigado por seu interesse em contribuir com o Ollama PHP 5.6 Client!
+Thank you for your interest in contributing to the Ollama PHP 5.6 Client!
 
-## Como Contribuir
+## How to Contribute
 
-### Reportando Bugs
+### Reporting Bugs
 
-1. Verifique se o bug já não foi reportado nos issues existentes
-2. Crie um novo issue com:
-   - Descrição clara do problema
-   - Passos para reproduzir
-   - Versão do PHP
-   - Versão do Ollama
-   - Código de exemplo que demonstra o problema
+1. Check if the bug has not already been reported in existing issues
+2. Create a new issue with:
+   - Clear description of the problem
+   - Steps to reproduce
+   - PHP version
+   - Ollama version
+   - Example code that demonstrates the problem
 
-### Solicitando Features
+### Requesting Features
 
-1. Abra um issue descrevendo:
-   - A funcionalidade desejada
-   - Casos de uso
-   - Exemplos de como deveria funcionar
+1. Open an issue describing:
+   - The desired functionality
+   - Use cases
+   - Examples of how it should work
 
-### Enviando Pull Requests
+### Submitting Pull Requests
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Faça suas alterações
-4. Adicione testes se aplicável
-5. Execute os testes existentes
-6. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
-7. Push para a branch (`git push origin feature/nova-feature`)
-8. Abra um Pull Request
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/new-feature`)
+3. Make your changes
+4. Add tests if applicable
+5. Run existing tests
+6. Commit your changes (`git commit -am 'Add new feature'`)
+7. Push to the branch (`git push origin feature/new-feature`)
+8. Open a Pull Request
 
-## Padrões de Código
+## Code Standards
 
-- Siga as PSR-1 e PSR-2 para estilo de código PHP
-- Use comentários PHPDoc para documentar métodos e classes
-- Mantenha compatibilidade com PHP 5.6+
-- Escreva testes para novas funcionalidades
+- Follow PSR-1 and PSR-2 for PHP code style
+- Use PHPDoc comments to document methods and classes
+- Maintain compatibility with PHP 5.6+
+- Write tests for new functionalities
 
-## Configurando o Ambiente de Desenvolvimento
+## Setting up Development Environment
 
 ```bash
-# Clone o projeto
+# Clone the project
 git clone https://github.com/vluzr/ollama-php56.git
 cd ollama-php56
 
-# Instale as dependências
+# Install dependencies
 composer install
 
-# Execute os testes
+# Run tests
 ./vendor/bin/phpunit
 ```
 
-## Testando
+## Testing
 
-Certifique-se de que:
-1. Todos os testes passam
-2. Sua contribuição inclui testes adequados
-3. O código funciona com PHP 5.6, 7.x e 8.x
+Make sure that:
+1. All tests pass
+2. Your contribution includes adequate tests
+3. The code works with PHP 5.6, 7.x and 8.x
 
-## Licença
+## License
 
-Ao contribuir, você concorda que suas contribuições serão licenciadas sob a mesma licença MIT do projeto.
+By contributing, you agree that your contributions will be licensed under the same MIT license as the project.

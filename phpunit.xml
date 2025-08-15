@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
-    bootstrap="vendor/autoload.php"
+    bootstrap="tests/bootstrap.php"
     colors="true"
     convertErrorsToExceptions="true"
     convertNoticesToExceptions="true"
@@ -9,7 +9,13 @@
     stopOnFailure="false"
 >
     <testsuites>
-        <testsuite name="Ollama Tests">
+        <testsuite name="Unit Tests">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration Tests">
+            <directory>tests/Integration</directory>
+        </testsuite>
+        <testsuite name="All Tests">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
@@ -19,4 +25,13 @@
             <directory suffix=".php">src</directory>
         </whitelist>
     </filter>
+
+    <php>
+        <!-- Configurações de ambiente para testes -->
+        <env name="OLLAMA_API_URL" value="http://localhost:11434" />
+        <env name="OPENAI_API_URL" value="http://localhost:11434/v1" />
+        <env name="TEST_MODEL" value="llama3.2:1b" />
+        <env name="RUN_INTEGRATION_TESTS" value="0" />
+        <env name="TEST_DEBUG" value="0" />
+    </php>
 </phpunit>

@@ -318,9 +318,22 @@ See example files in the `examples/` folder:
 - [`openai_usage.php`](examples/openai_usage.php) - OpenAI API examples
 - [`advanced_chat.php`](examples/advanced_chat.php) - Advanced chat with tools
 
+## Testing
+Build the docker image and run tests:
+
+```bash
+docker build -t ollama-php56 .
+docker run -it --rm \
+    -e OPENAI_API_URL="http://localhost:11434/v1" \
+    -e OLLAMA_API_URL="http://localhost:11434" \
+    -e RUN_INTEGRATION_TESTS=1 \
+    -e TEST_MODEL="llama3.2:1b" \
+    ollama-php56
+```
+
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+MIT
 
 ## Contributions
 
