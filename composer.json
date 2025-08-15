@@ -1,6 +1,6 @@
 {
     "name": "vluzrrmos/ollama-php",
-    "description": "Cliente PHP para a API do Ollama",
+    "description": "Cliente PHP para a API do Ollama/OpenAI",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -30,6 +30,7 @@
     },
     "keywords": [
         "ollama",
+        "openai",
         "ai",
         "llm",
         "api",
