@@ -1,4 +1,3 @@
-````markdown
 # Ollama PHP Client
 
 Cliente PHP para a API do Ollama, compatível com PHP 5.6+. Esta biblioteca fornece uma interface fácil de usar para interagir com o servidor Ollama e também inclui compatibilidade com a API OpenAI.
@@ -59,7 +58,7 @@ use Ollama\OpenAI;
 use Ollama\Models\Model;
 
 // Criar cliente OpenAI compatível
-$openai = new OpenAI('http://localhost:11434', 'ollama');
+$openai = new OpenAI('http://localhost:11434/v1', 'ollama');
 
 // Chat usando métodos OpenAI
 $response = $openai->chat('llama3.2', [
@@ -76,8 +75,8 @@ echo $response['choices'][0]['message']['content'];
 <?php
 use Ollama\Models\Model;
 
-// Criar modelo configurado
-$model = Model::llama32()
+// Criar modelo
+$model = (new Model('llama3.2'))
     ->setTemperature(0.8)
     ->setTopP(0.9)
     ->setNumCtx(4096)
@@ -106,14 +105,14 @@ $ollama->generate([
     'prompt' => 'Conte uma história',
     'stream' => true
 ], function($chunk) {
-    echo $chunk['response'] ?? '';
+    if (isset($chunk['response']) echo $chunk['response'];
 });
 
 // Com cliente OpenAI
 $openai->chatStream('llama3.2', [
     $openai->userMessage('Conte uma história')
 ], function($chunk) {
-    echo $chunk['choices'][0]['delta']['content'] ?? '';
+    if (isset($chunk['choices'][0]['delta']['content']) echo $chunk['choices'][0]['delta']['content'];
 });
 ```
 
@@ -172,6 +171,48 @@ $response = $openai->chat('llama3.2', [
 ]);
 ```
 
+
+## JSON Schema
+
+```php
+
+$response = $openai->chat('llama3.2', [
+    'messages' => [
+        Message::user('Quais são as cores primárias?')->toArray()
+    ],
+    'response_format' => [
+            'type' => 'json_schema',
+            'json_schema' => [
+                'name' => 'primary_colors',
+                'description' => 'Lista de cores primárias',
+                'strict' => true,
+                'schema' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'colors' => [
+                            'type' => 'array',
+                            'description' => 'Lista de cores primárias no idioma do usuário',
+                            'items' => ['type' => 'string']
+                        ]
+                    ],
+                    'required' => ['colors']
+                ],
+                
+            ]
+    ]
+]);
+
+echo json_encode($response['choices'][0]['message']['content'], JSON_PRETTY_PRINT);
+```
+
+```json
+{
+    "colors": ["vermelho", "azul", "amarelo"]
+}
+```
+
+> Note: O formato JSON Schema é útil para validar a estrutura da resposta e garantir que ela atenda às expectativas do usuário. Nem todos os modelos suportam esse formato, então verifique a documentação do modelo específico.
+
 ### Embeddings
 
 ```php
@@ -185,25 +226,6 @@ $response = $ollama->embeddings([
 $response = $openai->embed('all-minilm', [
     'Primeiro texto',
     'Segundo texto'
-]);
-```
-
-## Modelos Pré-configurados
-
-A classe `Model` oferece métodos estáticos para modelos populares:
-
-```php
-// Modelos pré-configurados
-$llama32 = Model::llama32();
-$llama31 = Model::llama31();
-$mistral = Model::mistral();
-$codellama = Model::codellama();
-$llava = Model::llava();
-
-// Modelo customizado
-$custom = Model::custom('meu-modelo', [
-    'temperature' => 0.7,
-    'top_p' => 0.9
 ]);
 ```
 
@@ -223,7 +245,7 @@ Esta biblioteca implementa os seguintes endpoints da OpenAI API:
 - `model`, `messages`, `temperature`, `top_p`, `max_tokens`
 - `stream`, `stream_options`, `stop`, `seed`
 - `frequency_penalty`, `presence_penalty`
-- `response_format` (JSON mode)
+- `response_format` (JSON mode: `json_object`, `json_schema`)
 - `tools` (function calling)
 
 #### Completions
@@ -268,13 +290,6 @@ try {
 
 ## Configuração
 
-### Variáveis de Ambiente
-
-```bash
-export OLLAMA_API_URL=http://localhost:11434
-export OLLAMA_API_TOKEN=seu-token-aqui
-```
-
 ### Opções do Cliente
 
 ```php
@@ -284,7 +299,7 @@ $ollama = new Ollama('http://localhost:11434', [
     'verify_ssl' => false
 ]);
 
-$openai = new OpenAI('http://localhost:11434', 'ollama', [
+$openai = new OpenAI('http://localhost:11434/v1', 'ollama', [
     'timeout' => 120
 ]);
 ```
@@ -310,5 +325,3 @@ MIT License. Veja [LICENSE](LICENSE) para detalhes.
 ## Contribuições
 
 Contribuições são bem-vindas! Veja [CONTRIBUTING.md](CONTRIBUTING.md) para guidelines.
-
-````
