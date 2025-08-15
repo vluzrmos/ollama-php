@@ -1,6 +1,6 @@
 <?php
 
-namespace Ollama\Exceptions;
+namespace Vluzrmos\Ollama\Exceptions;
 
 /**
  * Exceção para erros de validação

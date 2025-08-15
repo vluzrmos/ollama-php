@@ -1,5 +1,5 @@
 <?php
-namespace Ollama\Tools;
+namespace Vluzrmos\Ollama\Tools;
 
 use JsonSerializable;
 

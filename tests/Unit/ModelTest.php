@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\Models\Model;
+use Vluzrmos\Ollama\Models\Model;
 
 class ModelTest extends TestCase
 {

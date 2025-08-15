@@ -1,11 +1,11 @@
 <?php
 
-namespace Ollama;
+namespace Vluzrmos\Ollama;
 
-use Ollama\Exceptions\OllamaException;
-use Ollama\Http\HttpClient;
-use Ollama\Models\Model;
-use Ollama\Models\Message;
+use Vluzrmos\Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Http\HttpClient;
+use Vluzrmos\Ollama\Models\Model;
+use Vluzrmos\Ollama\Models\Message;
 
 /**
  * Cliente para API compatível com OpenAI usando Ollama

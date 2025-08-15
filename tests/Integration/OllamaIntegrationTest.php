@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\Ollama;
-use Ollama\Models\Model;
+use Vluzrmos\Ollama\Ollama;
+use Vluzrmos\Ollama\Models\Model;
 
 class OllamaIntegrationTest extends TestCase
 {
@@ -408,7 +408,7 @@ class OllamaIntegrationTest extends TestCase
     public function testToolManagerIntegration()
     {
         $toolManager = $this->client->getToolManager();
-        $this->assertInstanceOf('Ollama\\Tools\\ToolManager', $toolManager);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $toolManager);
         
         // Testa métodos básicos do ToolManager
         $tools = $this->client->listAvailableTools();

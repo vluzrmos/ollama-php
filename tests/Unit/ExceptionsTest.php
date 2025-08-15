@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\Exceptions\OllamaException;
-use Ollama\Exceptions\HttpException;
-use Ollama\Exceptions\ValidationException;
+use Vluzrmos\Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Exceptions\HttpException;
+use Vluzrmos\Ollama\Exceptions\ValidationException;
 
 class ExceptionsTest extends TestCase
 {
@@ -47,7 +47,7 @@ class ExceptionsTest extends TestCase
         
         $this->assertEquals('Erro HTTP', $exception->getMessage());
         $this->assertEquals(400, $exception->getCode());
-        $this->assertInstanceOf('Ollama\\Exceptions\\OllamaException', $exception);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $exception);
     }
 
     public function testHttpExceptionWithResponseData()
@@ -69,7 +69,7 @@ class ExceptionsTest extends TestCase
         $exception = new ValidationException('Parâmetro inválido');
         
         $this->assertEquals('Parâmetro inválido', $exception->getMessage());
-        $this->assertInstanceOf('Ollama\\Exceptions\\OllamaException', $exception);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $exception);
     }
 
     public function testExceptionInheritance()
@@ -83,8 +83,8 @@ class ExceptionsTest extends TestCase
         $this->assertInstanceOf('Exception', $httpException);
         $this->assertInstanceOf('Exception', $validationException);
         
-        $this->assertInstanceOf('Ollama\\Exceptions\\OllamaException', $httpException);
-        $this->assertInstanceOf('Ollama\\Exceptions\\OllamaException', $validationException);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $httpException);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $validationException);
     }
 
     public function testExceptionCanBeCaught()

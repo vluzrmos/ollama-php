@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Ollama\OpenAI;
-use Ollama\Models\Model;
-use Ollama\Utils\ImageHelper;
+use Vluzrmos\Ollama\OpenAI;
+use Vluzrmos\Ollama\Models\Model;
+use Vluzrmos\Ollama\Utils\ImageHelper;
 
 // Configure OpenAI compatible client
 $openai = new OpenAI(getenv('OPENAI_API_URL', 'http://localhost:11434/v1'), 'ollama');

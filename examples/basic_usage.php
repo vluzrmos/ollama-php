@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Ollama\Ollama;
-use Ollama\Models\Message;
+use Vluzrmos\Ollama\Ollama;
+use Vluzrmos\Ollama\Models\Message;
 
 // Configure client
 $client = new Ollama(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');

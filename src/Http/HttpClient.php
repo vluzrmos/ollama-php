@@ -1,9 +1,9 @@
 <?php
 
-namespace Ollama\Http;
+namespace Vluzrmos\Ollama\Http;
 
-use Ollama\Exceptions\HttpException;
-use Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Exceptions\HttpException;
+use Vluzrmos\Ollama\Exceptions\OllamaException;
 
 /**
  * Cliente HTTP para comunicação com a API do Ollama

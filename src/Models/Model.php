@@ -1,6 +1,6 @@
 <?php
 
-namespace Ollama\Models;
+namespace Vluzrmos\Ollama\Models;
 
 /**
  * Classe para mapeamento de modelos e seus parâmetros

@@ -1,11 +1,11 @@
 <?php
 
-namespace Ollama;
+namespace Vluzrmos\Ollama;
 
-use Ollama\Exceptions\OllamaException;
-use Ollama\Http\HttpClient;
-use Ollama\Models\Model;
-use Ollama\Tools\ToolManager;
+use Vluzrmos\Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Http\HttpClient;
+use Vluzrmos\Ollama\Models\Model;
+use Vluzrmos\Ollama\Tools\ToolManager;
 
 /**
  * Cliente principal para a API do Ollama

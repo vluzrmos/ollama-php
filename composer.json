@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Ollama\\": "src/"
+            "Vluzrmos\\Ollama\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Ollama\\Tests\\": "tests/"
+            "Vluzrmos\\Ollama\\Tests\\": "tests/"
         }
     },
     "keywords": [

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ollama\Models;
+namespace Vluzrmos\Ollama\Models;
 
 /**
  * Representa uma mensagem no chat

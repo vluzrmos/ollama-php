@@ -2,10 +2,10 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\Ollama;
-use Ollama\Models\Model;
-use Ollama\Tools\ToolManager;
-use Ollama\Exceptions\HttpException;
+use Vluzrmos\Ollama\Ollama;
+use Vluzrmos\Ollama\Models\Model;
+use Vluzrmos\Ollama\Tools\ToolManager;
+use Vluzrmos\Ollama\Exceptions\HttpException;
 
 class OllamaTest extends TestCase
 {
@@ -13,9 +13,9 @@ class OllamaTest extends TestCase
     {
         $client = new Ollama();
         
-        $this->assertInstanceOf('Ollama\\Ollama', $client);
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client->getHttpClient());
-        $this->assertInstanceOf('Ollama\\Tools\\ToolManager', $client->getToolManager());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Ollama', $client);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $client->getToolManager());
     }
 
     public function testOllamaCreationWithParameters()
@@ -25,8 +25,8 @@ class OllamaTest extends TestCase
         
         $client = new Ollama($baseUrl, $options);
         
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client->getHttpClient());
-        $this->assertInstanceOf('Ollama\\Tools\\ToolManager', $client->getToolManager());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $client->getToolManager());
     }
 
     public function testDefaultBaseUrl()
@@ -34,7 +34,7 @@ class OllamaTest extends TestCase
         $client = new Ollama();
         
         // Verifica se o client HTTP foi criado - indiretamente testa a URL padrão
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
     }
 
     public function testSetAndGetApiToken()
@@ -429,7 +429,7 @@ class OllamaTest extends TestCase
         $httpClientProperty->setAccessible(true);
         $httpClientProperty->setValue($client, $mockClient);
 
-        $this->expectException('Ollama\\Exceptions\\HttpException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\HttpException');
         $this->expectExceptionCode(500);
 
         $client->blobExists('sha256:error');
@@ -466,7 +466,7 @@ class OllamaTest extends TestCase
         $client = new Ollama();
         $toolManager = $client->getToolManager();
         
-        $this->assertInstanceOf('Ollama\\Tools\\ToolManager', $toolManager);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $toolManager);
         
         // Testa métodos que delegam para o ToolManager
         $this->assertTrue(method_exists($client, 'registerTool'));

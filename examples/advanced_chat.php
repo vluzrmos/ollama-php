@@ -2,10 +2,10 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Ollama\Ollama;
-use Ollama\Models\Message;
-use Ollama\Tools\ToolManager;
-use Ollama\Utils\ImageHelper;
+use Vluzrmos\Ollama\Ollama;
+use Vluzrmos\Ollama\Models\Message;
+use Vluzrmos\Ollama\Tools\ToolManager;
+use Vluzrmos\Ollama\Utils\ImageHelper;
 
 /**
  * Advanced example: Interactive chat system with tools

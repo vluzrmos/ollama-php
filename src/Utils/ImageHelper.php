@@ -1,6 +1,6 @@
 <?php
 
-namespace Ollama\Utils;
+namespace Vluzrmos\Ollama\Utils;
 
 /**
  * Utilitários para manipulação de imagens

@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\OpenAI;
-use Ollama\Models\Model;
+use Vluzrmos\Ollama\OpenAI;
+use Vluzrmos\Ollama\Models\Model;
 
 class OpenAIIntegrationTest extends TestCase
 {

@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\OpenAI;
-use Ollama\Models\Model;
-use Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\OpenAI;
+use Vluzrmos\Ollama\Models\Model;
+use Vluzrmos\Ollama\Exceptions\OllamaException;
 
 class OpenAITest extends TestCase
 {
@@ -12,9 +12,9 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->assertInstanceOf('Ollama\\OpenAI', $client);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\OpenAI', $client);
         $this->assertEquals('ollama', $client->getApiKey());
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
     }
 
     public function testOpenAICreationWithParameters()
@@ -26,7 +26,7 @@ class OpenAITest extends TestCase
         $client = new OpenAI($baseUrl, $apiKey, $options);
         
         $this->assertEquals('test-key', $client->getApiKey());
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
     }
 
     public function testDefaultBaseUrl()
@@ -34,7 +34,7 @@ class OpenAITest extends TestCase
         $client = new OpenAI();
         
         // Verifica se o client HTTP foi criado - indiretamente testa a URL padrão
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
     }
 
     public function testSetAndGetApiKey()
@@ -51,7 +51,7 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Ollama\\Exceptions\\OllamaException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
         $this->expectExceptionMessage('O parâmetro "model" é obrigatório');
         
         $client->chatCompletions(array(
@@ -63,7 +63,7 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Ollama\\Exceptions\\OllamaException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
         $this->expectExceptionMessage('O parâmetro "messages" é obrigatório');
         
         $client->chatCompletions(array(
@@ -75,7 +75,7 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Ollama\\Exceptions\\OllamaException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
         $this->expectExceptionMessage('O parâmetro "model" é obrigatório');
         
         $client->completions(array(
@@ -87,7 +87,7 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Ollama\\Exceptions\\OllamaException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
         $this->expectExceptionMessage('O parâmetro "prompt" é obrigatório');
         
         $client->completions(array(
@@ -99,7 +99,7 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Ollama\\Exceptions\\OllamaException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
         $this->expectExceptionMessage('O parâmetro "model" é obrigatório');
         
         $client->embeddings(array(
@@ -111,7 +111,7 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Ollama\\Exceptions\\OllamaException');
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
         $this->expectExceptionMessage('O parâmetro "input" é obrigatório');
         
         $client->embeddings(array(

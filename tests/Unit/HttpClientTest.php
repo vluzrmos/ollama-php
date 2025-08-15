@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
-use Ollama\Http\HttpClient;
-use Ollama\Exceptions\HttpException;
-use Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Http\HttpClient;
+use Vluzrmos\Ollama\Exceptions\HttpException;
+use Vluzrmos\Ollama\Exceptions\OllamaException;
 
 class HttpClientTest extends TestCase
 {
@@ -12,7 +12,7 @@ class HttpClientTest extends TestCase
     {
         $client = new HttpClient('http://localhost:11434');
         
-        $this->assertInstanceOf('Ollama\\Http\\HttpClient', $client);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client);
         $this->assertNull($client->getApiToken());
     }
 

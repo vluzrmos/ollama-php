@@ -29,11 +29,12 @@ composer require vluzrrmos/ollama-php
 
 ```php
 <?php
+
 require_once 'vendor/autoload.php';
 
-use Ollama\Ollama;
-use Ollama\Models\Message;
-use Ollama\Models\Model;
+use Vluzrmos\Ollama\Ollama;
+use Vluzrmos\Ollama\Models\Message;
+use Vluzrmos\Ollama\Models\Model;
 
 // Create client
 $ollama = new Ollama('http://localhost:11434');
@@ -54,8 +55,8 @@ echo $response['message']['content'];
 
 ```php
 <?php
-use Ollama\OpenAI;
-use Ollama\Models\Model;
+use Vluzrmos\Ollama\OpenAI;
+use Vluzrmos\Ollama\Models\Model;
 
 // Create OpenAI compatible client
 $openai = new OpenAI('http://localhost:11434/v1', 'ollama');
@@ -73,7 +74,7 @@ echo $response['choices'][0]['message']['content'];
 
 ```php
 <?php
-use Ollama\Models\Model;
+use Vluzrmos\Ollama\Models\Model;
 
 // Create model
 $model = (new Model('llama3.2'))
@@ -99,6 +100,7 @@ $response = $ollama->chat($params);
 ### Streaming
 
 ```php
+<?php
 // With Ollama client
 $ollama->generate([
     'model' => 'llama3.2',
@@ -119,6 +121,7 @@ $openai->chatStream('llama3.2', [
 ### Vision Models (Images)
 
 ```php
+<?php
 // With OpenAI client
 $response = $openai->chat('llava', [
     $openai->imageMessage(
@@ -131,6 +134,7 @@ $response = $openai->chat('llava', [
 ### Function Calling (Tools)
 
 ```php
+<?php
 $tools = [
     [
         'type' => 'function',
@@ -163,6 +167,7 @@ $response = $openai->chatCompletions([
 ### JSON Mode
 
 ```php
+<?php
 $response = $openai->chat('llama3.2', [
     $openai->systemMessage('Always respond in valid JSON.'),
     $openai->userMessage('List 3 primary colors')
@@ -175,7 +180,7 @@ $response = $openai->chat('llama3.2', [
 ## JSON Schema
 
 ```php
-
+<?php
 $response = $openai->chat('llama3.2', [
     'messages' => [
         Message::user('What are the primary colors?')->toArray()
@@ -216,6 +221,7 @@ echo json_encode($response['choices'][0]['message']['content'], JSON_PRETTY_PRIN
 ### Embeddings
 
 ```php
+<?php
 // Ollama
 $response = $ollama->embeddings([
     'model' => 'all-minilm',
@@ -275,7 +281,8 @@ $ollama->deleteModel('old-model');
 ## Error Handling
 
 ```php
-use Ollama\Exceptions\OllamaException;
+<?php
+use Vluzrmos\Ollama\Exceptions\OllamaException;
 
 try {
     $response = $ollama->chat([
@@ -293,6 +300,7 @@ try {
 ### Client Options
 
 ```php
+<?php
 $ollama = new Ollama('http://localhost:11434', [
     'timeout' => 60,
     'connect_timeout' => 10,

@@ -67,7 +67,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      */
     protected function createHttpClientMock()
     {
-        return $this->getMockBuilder('Ollama\\Http\\HttpClient')
+        return $this->getMockBuilder('Vluzrmos\\Ollama\\Http\\HttpClient')
             ->disableOriginalConstructor()
             ->getMock();
     }
