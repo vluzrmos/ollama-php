@@ -43,8 +43,8 @@ $ollama = new Ollama('http://localhost:11434');
 $response = $ollama->chat([
     'model' => 'llama3.2',
     'messages' => [
-        Message::system('You are a helpful assistant.')->toArray(),
-        Message::user('Hello!')->toArray()
+        Message::system('You are a helpful assistant.'),
+        Message::user('Hello!')
     ]
 ]);
 
@@ -244,7 +244,7 @@ $response = $openai->chatCompletions([
     'messages' => [
         ['role' => 'user', 'content' => 'What is 15 + 27?']
     ],
-    'tools' => $toolManager->toArray()
+    'tools' => $toolManager
 ]);
 
 // Handle tool calls from response
@@ -329,7 +329,7 @@ $response = $openai->chat('llama3.2', [
 <?php
 $response = $openai->chat('llama3.2', [
     'messages' => [
-        Message::user('What are the primary colors?')->toArray()
+        Message::user('What are the primary colors?')
     ],
     'response_format' => [
             'type' => 'json_schema',
@@ -433,7 +433,7 @@ use Vluzrmos\Ollama\Exceptions\OllamaException;
 try {
     $response = $ollama->chat([
         'model' => 'non-existent-model',
-        'messages' => [Message::user('Hello')->toArray()]
+        'messages' => [Message::user('Hello')]
     ]);
 } catch (OllamaException $e) {
     echo "Error: " . $e->getMessage();
