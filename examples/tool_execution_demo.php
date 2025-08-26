@@ -67,7 +67,7 @@ foreach ($results as $result) {
     echo "Success: " . ($result['success'] ? 'Yes' : 'No') . "\n";
     
     if ($result['success']) {
-        echo "Result: " . $result['result'] . "\n";
+        echo "Result: " . json_encode($result['result']) . "\n";
     } else {
         echo "Error: " . $result['error'] . "\n";
     }
@@ -119,7 +119,7 @@ try {
         foreach ($toolResults as $result) {
             echo "\nTool: " . $result['tool_name'] . "\n";
             if ($result['success']) {
-                echo "Result: " . $result['result'] . "\n";
+                echo "Result: " . json_encode($result['result']) . "\n";
             } else {
                 echo "Error: " . $result['error'] . "\n";
             }

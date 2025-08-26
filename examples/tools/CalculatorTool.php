@@ -120,6 +120,6 @@ class CalculatorTool extends AbstractTool
 
         echo basename(__FILE__, ".php") . ": Result: " . json_encode($response) . PHP_EOL;
 
-        return json_encode($response);
+        return $response;
     }
 }

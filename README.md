@@ -57,14 +57,15 @@ echo $response['message']['content'];
 <?php
 use Vluzrmos\Ollama\OpenAI;
 use Vluzrmos\Ollama\Models\Model;
+use Vluzrmos\Ollama\Models\Message;
 
 // Create OpenAI compatible client
 $openai = new OpenAI('http://localhost:11434/v1', 'ollama');
 
 // Chat using OpenAI methods
 $response = $openai->chat('llama3.2', [
-    $openai->systemMessage('You are a helpful assistant.'),
-    $openai->userMessage('Hello!')
+    Message::system('You are a helpful assistant.'),
+    Message::user('Hello!')
 ]);
 
 echo $response['choices'][0]['message']['content'];
@@ -75,7 +76,7 @@ echo $response['choices'][0]['message']['content'];
 ```php
 <?php
 use Vluzrmos\Ollama\Models\Model;
-
+use Vluzrmos\Ollama\Models\Message;
 // Create model
 $model = (new Model('llama3.2'))
     ->setTemperature(0.8)
@@ -85,12 +86,12 @@ $model = (new Model('llama3.2'))
 
 // Use with OpenAI client
 $response = $openai->chat($model, [
-    $openai->userMessage('Tell me a story')
+    Message::user('Tell me a story')
 ]);
 
 // Or use with Ollama client
 $params = array_merge($model->toArray(), [
-    'messages' => [Message::user('Tell me a story')->toArray()]
+    'messages' => [Message::user('Tell me a story')]
 ]);
 $response = $ollama->chat($params);
 ```
@@ -112,7 +113,7 @@ $ollama->generate([
 
 // With OpenAI client
 $openai->chatStream('llama3.2', [
-    $openai->userMessage('Tell me a story')
+    Message::user('Tell me a story')
 ], function($chunk) {
     if (isset($chunk['choices'][0]['delta']['content']) echo $chunk['choices'][0]['delta']['content'];
 });
@@ -122,11 +123,16 @@ $openai->chatStream('llama3.2', [
 
 ```php
 <?php
+
+use Vluzrmos\Ollama\Models\Message;
+use Vluzrmos\Ollama\Utils\ImageHelper;
+
 // With OpenAI client
 $response = $openai->chat('llava', [
     Message::image(
         'What do you see in this image?',
         'data:image/png;base64,iVBORw0KGg...'
+        // or ImageHelper::encodeImageUrl('path/to/your/image.png,jpg')
     )
 ]);
 ```
@@ -158,7 +164,7 @@ $tools = [
 $response = $openai->chatCompletions([
     'model' => 'llama3.2',
     'messages' => [
-        $openai->userMessage('How is the weather in São Paulo?')
+        Message::user('How is the weather in São Paulo?')
     ],
     'tools' => $tools
 ]);
@@ -211,12 +217,12 @@ class CalculatorTool extends AbstractTool
         $operation = $arguments['operation'];
         
         switch ($operation) {
-            case 'add': return json_encode(['result' => $a + $b]);
-            case 'subtract': return json_encode(['result' => $a - $b]);
-            case 'multiply': return json_encode(['result' => $a * $b]);
+            case 'add': return $a + $b;
+            case 'subtract': return $a - $b;
+            case 'multiply': return $a * $b;
             case 'divide': 
-                if ($b == 0) return json_encode(['error' => 'Division by zero']);
-                return json_encode(['result' => $a / $b]);
+                if ($b == 0) throw new ToolExecutionException('Division by zero');
+                return $a / $b;
         }
     }
 }
@@ -309,8 +315,8 @@ foreach ($results as $result) {
 ```php
 <?php
 $response = $openai->chat('llama3.2', [
-    $openai->systemMessage('Always respond in valid JSON.'),
-    $openai->userMessage('List 3 primary colors')
+    Message::system('Always respond in valid JSON.'),
+    Message::user('List 3 primary colors')
 ], [
     'response_format' => $openai->jsonFormat()
 ]);

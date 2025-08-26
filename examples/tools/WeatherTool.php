@@ -75,7 +75,7 @@ class WeatherTool extends AbstractTool
         // Mock data example based on location
         $weatherData = $this->getMockWeatherData($location, $unit);
 
-        return json_encode($weatherData);
+        return $weatherData;
     }
 
     /**
