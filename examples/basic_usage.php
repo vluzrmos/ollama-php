@@ -1,9 +1,11 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/tools/WeatherTool.php';
 
 date_default_timezone_set('America/Bahia');
 
+use Examples\Tools\WeatherTool;
 use Vluzrmos\Ollama\Ollama;
 use Vluzrmos\Ollama\Models\Message;
 
@@ -81,7 +83,7 @@ try {
 echo "=== Example 5: Tool Calling ===\n";
 try {
     $tools = [
-        
+        new WeatherTool()
     ];
     
     $response = $client->chat([

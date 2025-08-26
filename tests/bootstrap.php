@@ -1,7 +1,7 @@
 <?php
 
-// Bootstrap para os testes
-// Configura o autoloader e variáveis de ambiente padrão
+// Bootstrap for tests
+// Sets up the autoloader and default environment variables
 
 // Autoloader do Composer
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -9,7 +9,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Define timezone padrão
 date_default_timezone_set('America/Bahia');
 
-// Configurações padrão de ambiente para testes
+// Default environment settings for tests
 if (!getenv('OLLAMA_API_URL')) {
     putenv('OLLAMA_API_URL=http://localhost:11434');
 }
@@ -30,12 +30,12 @@ if (!getenv('RUN_INTEGRATION_TESTS')) {
     putenv('RUN_INTEGRATION_TESTS=0');
 }
 
-// Configurações do PHP para testes
+// PHP settings for tests
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 
-// Função auxiliar para debug durante desenvolvimento dos testes
+// Helper function for debugging during test development
 if (!function_exists('test_debug')) {
     function test_debug($message, $data = null) {
         if (getenv('TEST_DEBUG') === '1') {
@@ -48,7 +48,7 @@ if (!function_exists('test_debug')) {
     }
 }
 
-// Função auxiliar para verificar se temos conectividade com o servidor
+// Helper function to check server connectivity
 if (!function_exists('check_server_connectivity')) {
     function check_server_connectivity($url, $timeout = 5) {
         $context = stream_context_create(array(
@@ -63,7 +63,7 @@ if (!function_exists('check_server_connectivity')) {
     }
 }
 
-echo "Bootstrap concluído.\n";
+echo "Bootstrap completed.\n";
 echo "OLLAMA_API_URL: " . getenv('OLLAMA_API_URL') . "\n";
 echo "OPENAI_API_URL: " . getenv('OPENAI_API_URL') . "\n";
 echo "TEST_MODEL: " . getenv('TEST_MODEL') . "\n";

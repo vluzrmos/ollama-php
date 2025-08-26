@@ -3,36 +3,36 @@
 namespace Vluzrmos\Ollama\Utils;
 
 /**
- * Utilitários para manipulação de imagens
+ * Image manipulation utilities
  */
 class ImageHelper
 {
     /**
-     * Codifica uma imagem em base64
+     * Encodes an image to base64
      *
-     * @param string $imagePath Caminho para o arquivo de imagem
+     * @param string $imagePath Path to the image file
      * @return string
      * @throws \InvalidArgumentException
      */
     public static function encodeImage($imagePath)
     {
         if (!file_exists($imagePath)) {
-            throw new \InvalidArgumentException('Arquivo de imagem não encontrado: ' . $imagePath);
+            throw new \InvalidArgumentException('Image file not found: ' . $imagePath);
         }
 
         $imageData = file_get_contents($imagePath);
         if ($imageData === false) {
-            throw new \InvalidArgumentException('Falha ao ler arquivo de imagem: ' . $imagePath);
+            throw new \InvalidArgumentException('Failed to read image file: ' . $imagePath);
         }
         
         return base64_encode($imageData);
     }
 
     /**
-     * Codifica múltiplas imagens em base64
+     * Encodes multiple images to base64
      *
-     * @param array $imagePaths Array de caminhos para arquivos de imagem
-     * @return array Array de imagens codificadas em base64
+     * @param array $imagePaths Array of image file paths
+     * @return array Array of base64 encoded images
      */
     public static function encodeImages(array $imagePaths)
     {
@@ -51,7 +51,7 @@ class ImageHelper
         $info = static::getImageInfo($imagePath);
 
         if ($info === false) {
-            throw new \InvalidArgumentException('Não foi possível obter informações da imagem: ' . $imagePath);
+            throw new \InvalidArgumentException('Could not get image information: ' . $imagePath);
         }
 
         return 'data:' . $info['mime'] . ';base64,' . $data;
@@ -68,7 +68,7 @@ class ImageHelper
         return $encodedImages;
     }
     /**
-     * Valida se um arquivo é uma imagem suportada
+     * Validates if a file is a supported image
      *
      * @param string $imagePath
      * @return bool
@@ -85,7 +85,7 @@ class ImageHelper
 
 
     /**
-     * Obtém informações sobre uma imagem
+     * Gets information about an image
      *
      * @param string $imagePath
      * @return array|false

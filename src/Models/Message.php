@@ -5,7 +5,7 @@ namespace Vluzrmos\Ollama\Models;
 use ArrayAccess;
 
 /**
- * Representa uma mensagem no chat
+ * Represents a chat message
  */
 class Message implements ArrayAccess
 {
@@ -37,6 +37,11 @@ class Message implements ArrayAccess
     /**
      * @var string|null
      */
+    public $toolCallId;
+
+    /**
+     * @var string|null
+     */
     public $thinking;
 
     /**
@@ -52,7 +57,7 @@ class Message implements ArrayAccess
     }
 
     /**
-     * Cria uma mensagem do usuário
+     * Creates a user message
      *
      * @param string $content
      * @param array|null $images
@@ -64,7 +69,7 @@ class Message implements ArrayAccess
     }
 
     /**
-     * Cria uma mensagem do assistente
+     * Creates an assistant message
      *
      * @param string $content
      * @return Message
@@ -75,7 +80,7 @@ class Message implements ArrayAccess
     }
 
     /**
-     * Cria uma mensagem do sistema
+     * Creates a system message
      *
      * @param string $content
      * @return Message
@@ -86,7 +91,7 @@ class Message implements ArrayAccess
     }
 
     /**
-     * Cria uma mensagem de tool
+     * Creates a tool message
      *
      * @param string $content
      * @param string $toolName
@@ -100,11 +105,11 @@ class Message implements ArrayAccess
     }
 
     /**
-     * Cria uma mensagem com imagem (para modelos de visão como llava)
+     * Creates a message with image (for vision models like llava)
      *
-     * @param string $text Texto da mensagem
-     * @param string $imageUrl URL da imagem ou dados base64
-     * @param string $role Papel da mensagem (padrão: user)
+     * @param string $text Message text
+     * @param string $imageUrl Image URL or base64 data
+     * @param string $role Message role (default: user)
      * @return Message
      */
     public static function image($text, $imageUrl, $role = 'user')
@@ -123,7 +128,10 @@ class Message implements ArrayAccess
         $role = isset($message['role']) ? $message['role'] : null;
         $content = isset($message['content']) ? $message['content'] : null;
         $images = isset($message['images']) ? $message['images'] : null;
-
+        $thinking = isset($message['thinking']) ? $message['thinking'] : null;
+        $toolName = isset($message['tool_name']) ? $message['tool_name'] : (isset($message['toolName']) ? $message['toolName'] : null);
+        $toolCallId = isset($message['tool_call_id']) ? $message['tool_call_id'] : (isset($message['toolCallId']) ? $message['toolCallId'] : null);
+        
         if ($role === null || $content === null) {
             throw new \InvalidArgumentException("Array must contain 'role' and 'content' keys.");
         }
@@ -132,13 +140,27 @@ class Message implements ArrayAccess
             foreach ($content as $part) {
                 if ($part['type'] === 'text') {
                     $content = $part['text'];
-                } elseif ($part['type'] === 'image_url' && isset($part['images'])) {
-                    $images = array_merge($images, is_array($part['images']) ? $part['images'] : [$part['images']]);
+                } elseif ($part['type'] === 'image_url' && isset($part['image_url'])) {
+                    $images = array_merge($images, is_array($part['image_url']) ? $part['image_url'] : [$part['image_url']]);
                 }
             }
         }
 
-        return new self($role, $content, $images);
+        $instance = new self($role, $content, $images);
+
+        if ($thinking !== null) {
+            $instance->thinking = $thinking;
+        }
+
+        if ($toolName !== null) {
+            $instance->toolName = $toolName;
+        }
+
+        if ($toolCallId !== null) {
+            $instance->toolCallId = $toolCallId;
+        }
+
+        return $instance;
     }
 
     protected function getAcessibleProperties()
@@ -149,7 +171,8 @@ class Message implements ArrayAccess
             'images',
             'toolCalls',
             'toolName',
-            'thinking'
+            'thinking',
+            'toolCallId',
         ];
     }
 

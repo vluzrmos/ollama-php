@@ -42,7 +42,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Verifica se os testes de integração devem ser executados
+     * Checks if integration tests should be run
      *
      * @return bool
      */
@@ -52,14 +52,14 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Pula o teste se os testes de integração estão desabilitados
+     * Skips the test if integration tests are disabled
      *
      * @return void
      */
     protected function skipIfIntegrationDisabled()
     {
         if (!$this->shouldRunIntegrationTests()) {
-            $this->markTestSkipped('Testes de integração desabilitados. Use RUN_INTEGRATION_TESTS=1 para habilitar.');
+            $this->markTestSkipped('Integration tests disabled. Use RUN_INTEGRATION_TESTS=1 to enable.');
         }
     }
 
@@ -188,7 +188,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Cria dados de resposta mock para lista de modelos
+     * Creates mock response data for models list
      *
      * @return array
      */
@@ -214,7 +214,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Cria dados de resposta mock para show model do Ollama
+     * Creates mock response data for Ollama show model
      *
      * @param string $model
      * @return array
@@ -246,12 +246,12 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     protected function assertArrayHasKeys(array $expectedKeys, array $array, $message = '')
     {
         foreach ($expectedKeys as $key) {
-            $this->assertArrayHasKey($key, $array, $message . " (chave: $key)");
+            $this->assertArrayHasKey($key, $array, $message . " (key: $key)");
         }
     }
 
     /**
-     * Asserta que uma string é JSON válido
+     * Asserts that a string is valid JSON
      *
      * @param string $string
      * @param string $message
@@ -259,17 +259,17 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     protected function assertIsValidJson($string, $message = '')
     {
         json_decode($string);
-        $this->assertEquals(JSON_ERROR_NONE, json_last_error(), $message ?: 'String não é JSON válido');
+        $this->assertEquals(JSON_ERROR_NONE, json_last_error(), $message ?: 'String is not valid JSON');
     }
 
     /**
-     * Cria uma mensagem de chat para testes
+     * Creates a chat message for tests
      *
      * @param string $role
      * @param string $content
      * @return array
      */
-    protected function createMessage($role = 'user', $content = 'Olá, como você está?')
+    protected function createMessage($role = 'user', $content = 'Hello, how are you?')
     {
         return array(
             'role' => $role,

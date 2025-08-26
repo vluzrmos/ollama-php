@@ -11,8 +11,8 @@ use Vluzrmos\Ollama\Models\MessageFormatter;
 use Vluzrmos\Ollama\Models\OpenAIMessageFormatter;
 
 /**
- * Cliente para API compatível com OpenAI usando Ollama
- * Implementa os endpoints compatíveis conforme documentação em openai.md
+ * Client for OpenAI-compatible API using Ollama
+ * Implements compatible endpoints as per openai.md documentation
  */
 class OpenAI
 {
@@ -37,9 +37,9 @@ class OpenAI
     private $messageFormatter;
 
     /**
-     * @param string $baseUrl URL base do servidor (ex: http://localhost:11434)
-     * @param string $apiKey Chave API (obrigatório mas ignorado pelo Ollama)
-     * @param array $options Opções adicionais para configuração
+     * @param string $baseUrl Base server URL (e.g. http://localhost:11434)
+     * @param string $apiKey API key (required but ignored by Ollama)
+     * @param array $options Additional configuration options
      */
     public function __construct($baseUrl = 'http://localhost:11434/v1', $apiKey = 'ollama', array $options = array(), MessageFormatter $messageFormatter = null)
     {
@@ -51,7 +51,7 @@ class OpenAI
     }
 
     /**
-     * Define o token de API
+     * Sets the API token
      *
      * @param string $apiKey
      * @return void
@@ -63,7 +63,7 @@ class OpenAI
     }
 
     /**
-     * Obtém o token de API
+     * Gets the API token
      *
      * @return string
      */
@@ -208,11 +208,11 @@ class OpenAI
         return $this;
     }
     /**
-     * Cria uma chat completion simples
+     * Creates a simple chat completion
      *
-     * @param string|Model $model Nome do modelo ou instância de Model
-     * @param array $messages Array de mensagens
-     * @param array $options Opções adicionais
+     * @param string|Model $model Model name or Model instance
+     * @param array $messages Array of messages
+     * @param array $options Additional options
      * @param callable|null $streamCallback Callback para streaming
      * @return array
      * @throws OllamaException
@@ -337,9 +337,9 @@ class OpenAI
     }
 
     /**
-     * Método auxiliar para extrair o nome do modelo dos parâmetros
+     * Helper method to extract model name from parameters
      *
-     * @param array $params Parâmetros da requisição
+     * @param array $params Request parameters
      * @return void
      */
     private function parseModelFromParams(array &$params)

@@ -11,7 +11,7 @@ use Vluzrmos\Ollama\Models\Model;
 use Vluzrmos\Ollama\Models\OllamaMessageFormatter;
 
 /**
- * Cliente principal para a API do Ollama
+ * Main client for the Ollama API
  */
 class Ollama
 {
@@ -32,8 +32,8 @@ class Ollama
     private $messageFormatter;
 
     /**
-     * @param string $baseUrl URL base do servidor Ollama (ex: http://localhost:11434)
-     * @param array $options Opções adicionais para configuração
+     * @param string $baseUrl Base URL of the Ollama server (e.g. http://localhost:11434)
+     * @param array $options Additional configuration options
      */
     public function __construct($baseUrl = 'http://localhost:11434', array $options = array(), MessageFormatter $messageFormatter = null)
     {
@@ -139,9 +139,9 @@ class Ollama
     }
 
     /**
-     * Extrai o modelo dos parâmetros e o define no objeto Model
+     * Extracts the model from parameters and sets it on the Model object
      *
-     * @param array $params Parâmetros da requisição
+     * @param array $params Request parameters
      */
     private function parseModelFromParams(array &$params)
     {

@@ -68,7 +68,7 @@ class ChatSystem
             $assistantMessage = $response['message'];
 
             // Check if the model wants to use tools
-            if (isset($assistantMessage['tool_calls']) && !empty($assistantMessage['tool_calls'])) {
+            if (isset($assistantMessage['tool_calls']) && !empty($assistantMessage['tool_calls'])) {                
                 return $this->handleToolCalls($assistantMessage['tool_calls'], $model);
             } else {
                 // Add assistant response to history
@@ -82,20 +82,13 @@ class ChatSystem
 
     private function handleToolCalls($toolCalls, $model)
     {
-        $results = array();
-
-        foreach ($toolCalls as $toolCall) {
-            $functionName = $toolCall['function']['name'];
-            $arguments = $toolCall['function']['arguments'];
-
-            // Execute function
-            $result = $this->executeFunction($functionName, $arguments, $model);
-
-            // Add result as tool message
-            $this->messages[] = Message::tool($result, $functionName);
-            $results[] = "Result from $functionName: $result";
-        }
-
+        $this->messages = array_merge(
+            $this->messages,
+            $this->tools->toolCallResultsToMessages(
+                $this->tools->executeToolCalls($toolCalls)
+            )
+        );
+        
         // Make new call to model with tool results
         try {
             $response = $this->client->chat(array(
@@ -112,16 +105,6 @@ class ChatSystem
         } catch (Exception $e) {
             return "Error processing tool results: " . $e->getMessage();
         }
-    }
-
-    private function executeFunction($functionName, $arguments)
-    {
-        if ($this->tools->hasTool($functionName)) {
-            $tool = $this->tools->getTool($functionName);
-            return $tool->execute($arguments);
-        }
-
-        throw new InvalidArgumentException("Tool '$functionName' not registered.");
     }
 
     private function prepareMessages()
@@ -175,7 +158,7 @@ echo "Response: $response\n\n";
 
 echo "=== Conversation History ===\n";
 $history = $chatSystem->getConversationHistory();
-foreach ($history as $i => $message) {
+foreach ($history as $i => $message) {    
     echo ($i + 1) . ". [{$message->role}]: {$message->content}\n";
     if ($message->toolName) {
         echo "   (Tool: {$message->toolName})\n";

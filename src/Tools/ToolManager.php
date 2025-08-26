@@ -4,6 +4,7 @@ namespace Vluzrmos\Ollama\Tools;
 
 use JsonSerializable;
 use Vluzrmos\Ollama\Exceptions\ToolExecutionException;
+use Vluzrmos\Ollama\Models\Message;
 
 /**
  * System tools manager
@@ -17,7 +18,7 @@ class ToolManager implements JsonSerializable
     private $tools;
 
     /**
-     * Construtor
+     * Constructor
      */
     public function __construct()
     {
@@ -217,7 +218,7 @@ class ToolManager implements JsonSerializable
      */
     public function toolCallResultsToMessages(array $toolCallResults)
     {
-        $messages = array();
+        $messages = [];
 
         foreach ($toolCallResults as $result) {
             $content = '';
@@ -228,19 +229,17 @@ class ToolManager implements JsonSerializable
                 $content = 'Error: ' . $result['error'];
             }
 
-            $message = array(
-                'role' => 'tool',
-                'content' => $content
-            );
+            $toolName = null;
+
+            if (isset($result['tool_name'])) {
+                $toolName = $result['tool_name'];
+            }
+
+            $message = Message::tool($content, $toolName);
 
             // Add tool_call_id if available (OpenAI format)
             if (isset($result['id']) && $result['id'] !== null) {
-                $message['tool_call_id'] = $result['id'];
-            }
-
-            // Add tool name if available (Ollama format)
-            if (isset($result['tool_name'])) {
-                $message['tool_name'] = $result['tool_name'];
+                $message->toolCallId = $result['id'];
             }
 
             $messages[] = $message;

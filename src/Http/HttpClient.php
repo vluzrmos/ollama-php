@@ -39,16 +39,16 @@ class HttpClient
             'verify_ssl' => true
         ), $options);
 
-        // Extrair token de API das opções se fornecido
+        // Extract API token from options if provided
         if (isset($options['api_token'])) {
             $this->apiToken = $options['api_token'];
         }
     }
 
     /**
-     * Define o token de API para autenticação
+     * Sets the API token for authentication
      *
-     * @param string $token Token de API
+     * @param string $token API token
      * @return void
      */
     public function setApiToken($token)
@@ -57,7 +57,7 @@ class HttpClient
     }
 
     /**
-     * Obtém o token de API configurado
+     * Gets the configured API token
      *
      * @return string|null
      */
@@ -108,18 +108,18 @@ class HttpClient
         $jsonData = json_encode($data);
 
         if ($jsonData === false) {
-            throw new OllamaException('Falha ao codificar dados JSON');
+            throw new OllamaException('Failed to encode JSON data');
         }
 
         $ch = curl_init();
 
-        // Preparar headers
+        // Prepare headers
         $headers = array(
             'Content-Type: application/json',
             'Content-Length: ' . strlen($jsonData)
         );
 
-        // Adicionar token de autorização se disponível
+        // Add authorization token if available
         if ($this->apiToken) {
             $headers[] = 'Authorization: Bearer ' . $this->apiToken;
         }
@@ -243,27 +243,27 @@ class HttpClient
             CURLOPT_CUSTOMREQUEST => $method
         );
 
-        // Headers padrão
+        // Default headers
         $defaultHeaders = array();
 
-        // Adicionar token de autorização se disponível
+        // Add authorization token if available
         if ($this->apiToken) {
             $defaultHeaders[] = 'Authorization: Bearer ' . $this->apiToken;
         }
 
-        // Preparar dados se necessário - sempre enviar como JSON
+        // Prepare data if needed - always send as JSON
         if ($data !== null) {
             if (is_array($data) || is_object($data)) {
                 $jsonData = json_encode($data);
 
                 if ($jsonData === false) {
-                    throw new OllamaException('Falha ao codificar dados JSON');
+                    throw new OllamaException('Failed to encode JSON data');
                 }
 
                 $data = $jsonData;
             }
 
-            // Sempre definir Content-Type como JSON quando há dados
+            // Always set Content-Type as JSON when there's data
             $defaultHeaders[] = 'Content-Type: application/json';
             $curlOptions[CURLOPT_POSTFIELDS] = $data;
         }
@@ -274,7 +274,7 @@ class HttpClient
             $curlOptions[CURLOPT_HTTPHEADER] = $allHeaders;
         }
 
-        // Configurações específicas por método
+        // Method-specific configurations
         switch ($method) {
             case 'HEAD':
                 $curlOptions[CURLOPT_NOBODY] = true;
@@ -289,31 +289,31 @@ class HttpClient
         curl_close($ch);
 
         if ($response === false) {
-            throw new HttpException('Erro cURL: ' . $error);
+            throw new HttpException('cURL Error: ' . $error);
         }
 
-        // Para requisições HEAD, só precisamos verificar o código HTTP
+        // For HEAD requests, we only need to check the HTTP code
         if ($method === 'HEAD') {
             if ($httpCode >= 400) {
-                throw new HttpException('Erro HTTP: ' . $httpCode, $httpCode);
+                throw new HttpException('HTTP Error: ' . $httpCode, $httpCode);
             }
             return array('http_code' => $httpCode);
         }
 
-        // Verificar código HTTP
+        // Check HTTP code
         if ($httpCode >= 400) {
             $errorData = null;
             if (!empty($response)) {
                 $errorData = json_decode($response, true);
             }
-            throw new HttpException('Erro HTTP: ' . $httpCode, $httpCode, null, $errorData);
+            throw new HttpException('HTTP Error: ' . $httpCode, $httpCode, null, $errorData);
         }
 
-        // Decodificar resposta JSON se esperamos um corpo
+        // Decode JSON response if we expect a body
         if ($expectBody && !empty($response)) {
             $decoded = json_decode($response, true);
             if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
-                throw new OllamaException('Falha ao decodificar resposta JSON: ' . json_last_error_msg());
+                throw new OllamaException('Failed to decode JSON response: ' . json_last_error_msg());
             }
             return $decoded;
         }
