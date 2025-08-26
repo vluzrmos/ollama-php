@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing to the Ollama PHP 5.6 Client!
+Thank you for your interest in contributing to the Ollama/OpenAI PHP Client!
 
 ## How to Contribute
 
@@ -43,8 +43,8 @@ Thank you for your interest in contributing to the Ollama PHP 5.6 Client!
 
 ```bash
 # Clone the project
-git clone https://github.com/vluzr/ollama-php56.git
-cd ollama-php56
+git clone https://github.com/vluzrmos/ollama-php.git
+cd ollama-php
 
 # Install dependencies
 composer install

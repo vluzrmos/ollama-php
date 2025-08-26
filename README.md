@@ -1,6 +1,6 @@
 # Ollama PHP Client
 
-PHP client for Ollama API, compatible with PHP 5.6+. This library provides an easy-to-use interface to interact with Ollama server and also includes OpenAI API compatibility.
+PHP client for Ollama/OpenAI API, compatible with PHP 5.6+. This library provides an easy-to-use interface to interact with Ollama server and also includes OpenAI API compatibility.
 
 ## Features
 
