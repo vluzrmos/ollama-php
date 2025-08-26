@@ -124,7 +124,7 @@ $openai->chatStream('llama3.2', [
 <?php
 // With OpenAI client
 $response = $openai->chat('llava', [
-    $openai->imageMessage(
+    Message::image(
         'What do you see in this image?',
         'data:image/png;base64,iVBORw0KGg...'
     )

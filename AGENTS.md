@@ -5,6 +5,8 @@ The project goals to support php 5.6+ and provide an easy-to-use interface to in
 # Compatibility with PHP 5.6+
 
  - Always use short array syntax `[]` instead of `array()`.
+ - Always use `<?php` tags, avoid short tags `<?`.
+ - Always use `::class` constant to reference classes instead of `"Fully\\Qualified\\ClassName"`. Example: `MyClass::class`.
  - Avoid using scalar type hints and return type declarations.
  - Avoid using named arguments in function calls.
  - Avoid using the null coalescing operator (`??`), use `isset()` instead.

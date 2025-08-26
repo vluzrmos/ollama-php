@@ -4,7 +4,6 @@ require_once __DIR__ . '/../TestCase.php';
 
 use Vluzrmos\Ollama\Exceptions\OllamaException;
 use Vluzrmos\Ollama\Exceptions\HttpException;
-use Vluzrmos\Ollama\Exceptions\ValidationException;
 
 class ExceptionsTest extends TestCase
 {
@@ -64,27 +63,17 @@ class ExceptionsTest extends TestCase
         $this->assertEquals($responseData, $exception->getResponseData());
     }
 
-    public function testValidationExceptionCreation()
-    {
-        $exception = new ValidationException('Parâmetro inválido');
-        
-        $this->assertEquals('Parâmetro inválido', $exception->getMessage());
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $exception);
-    }
 
     public function testExceptionInheritance()
     {
         $ollamaException = new OllamaException('Teste');
         $httpException = new HttpException('Teste HTTP');
-        $validationException = new ValidationException('Teste validação');
         
         // Verifica hierarquia de herança
         $this->assertInstanceOf('Exception', $ollamaException);
         $this->assertInstanceOf('Exception', $httpException);
-        $this->assertInstanceOf('Exception', $validationException);
         
         $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $httpException);
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $validationException);
     }
 
     public function testExceptionCanBeCaught()
@@ -114,19 +103,5 @@ class ExceptionsTest extends TestCase
         }
         
         $this->assertTrue($caught, 'Exceção HTTP não foi capturada como OllamaException');
-    }
-
-    public function testValidationExceptionCanBeCaughtAsOllamaException()
-    {
-        $caught = false;
-        
-        try {
-            throw new ValidationException('Erro de validação');
-        } catch (OllamaException $e) {
-            $caught = true;
-            $this->assertEquals('Erro de validação', $e->getMessage());
-        }
-        
-        $this->assertTrue($caught, 'Exceção de validação não foi capturada como OllamaException');
     }
 }

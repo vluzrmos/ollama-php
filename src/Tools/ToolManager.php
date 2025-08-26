@@ -3,6 +3,7 @@
 namespace Vluzrmos\Ollama\Tools;
 
 use JsonSerializable;
+use Vluzrmos\Ollama\Exceptions\ToolExecutionException;
 
 /**
  * System tools manager
@@ -143,9 +144,10 @@ class ToolManager implements JsonSerializable
             if (!isset($toolCall['function'])) {
                 $results[] = array(
                     'id' => isset($toolCall['id']) ? $toolCall['id'] : null,
-                    'error' => 'Invalid tool call: function not specified',
+                    'error' => 'Invalid tool call, function name not specified',
                     'success' => false
                 );
+
                 continue;
             }
 
@@ -177,28 +179,27 @@ class ToolManager implements JsonSerializable
             // Execute the tool
             try {
                 if (!$this->hasTool($toolName)) {
-                    $results[] = array(
-                        'id' => $toolId,
-                        'error' => 'Tool not found: ' . $toolName,
-                        'success' => false,
-                        'tool_name' => $toolName
-                    );
-                    continue;
+                    throw new ToolExecutionException("Tool \"{$toolName}\" wasn't found");
                 }
 
                 $result = $this->executeTool($toolName, $arguments);
-                
+
                 $results[] = array(
                     'id' => $toolId,
                     'result' => $result,
                     'success' => true,
                     'tool_name' => $toolName
                 );
-
             } catch (\Exception $e) {
+                if ($e instanceof ToolExecutionException) {
+                    $message = $e->getMessage();
+                } else {
+                    $message = "Error executing tool \"{$toolName}\"". ($toolId? " (id: {$toolId})" : "");
+                }
+
                 $results[] = array(
                     'id' => $toolId,
-                    'error' => $e->getMessage(),
+                    'error' => $message,
                     'success' => false,
                     'tool_name' => $toolName
                 );
@@ -220,7 +221,7 @@ class ToolManager implements JsonSerializable
 
         foreach ($toolCallResults as $result) {
             $content = '';
-            
+
             if ($result['success']) {
                 $content = is_string($result['result']) ? $result['result'] : json_encode($result['result']);
             } else {

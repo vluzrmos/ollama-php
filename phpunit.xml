@@ -7,6 +7,7 @@
     convertWarningsToExceptions="true"
     processIsolation="false"
     stopOnFailure="false"
+    displayDetailsOnSkippedTests="true"
 >
     <testsuites>
         <testsuite name="Unit Tests">
@@ -30,7 +31,8 @@
         <!-- Configurações de ambiente para testes -->
         <env name="OLLAMA_API_URL" value="http://localhost:11434" />
         <env name="OPENAI_API_URL" value="http://localhost:11434/v1" />
-        <env name="TEST_MODEL" value="llama3.2:1b" />
+        <env name="TEST_MODEL" value="qwen2.5:3b" />
+        <env name="TEST_VISION_MODEL" value="qwen2.5vl:3b" />
         <env name="RUN_INTEGRATION_TESTS" value="0" />
         <env name="TEST_DEBUG" value="0" />
     </php>

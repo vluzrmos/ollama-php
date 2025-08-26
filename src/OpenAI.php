@@ -3,9 +3,12 @@
 namespace Vluzrmos\Ollama;
 
 use Vluzrmos\Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Exceptions\RequiredParameterException;
 use Vluzrmos\Ollama\Http\HttpClient;
 use Vluzrmos\Ollama\Models\Model;
 use Vluzrmos\Ollama\Models\Message;
+use Vluzrmos\Ollama\Models\MessageFormatter;
+use Vluzrmos\Ollama\Models\OpenAIMessageFormatter;
 
 /**
  * Cliente para API compatível com OpenAI usando Ollama
@@ -29,16 +32,22 @@ class OpenAI
     private $apiKey;
 
     /**
+     * @var OpenAIMessageFormatter
+     */
+    private $messageFormatter;
+
+    /**
      * @param string $baseUrl URL base do servidor (ex: http://localhost:11434)
      * @param string $apiKey Chave API (obrigatório mas ignorado pelo Ollama)
      * @param array $options Opções adicionais para configuração
      */
-    public function __construct($baseUrl = 'http://localhost:11434/v1', $apiKey = 'ollama', array $options = array())
+    public function __construct($baseUrl = 'http://localhost:11434/v1', $apiKey = 'ollama', array $options = array(), MessageFormatter $messageFormatter = null)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->apiKey = $apiKey;
         $this->httpClient = new HttpClient($this->baseUrl, $options);
         $this->httpClient->setApiToken($apiKey);
+        $this->messageFormatter = $messageFormatter;
     }
 
     /**
@@ -75,16 +84,13 @@ class OpenAI
     {
         $endpoint = '/chat/completions';
 
-        // Valida parâmetros obrigatórios
-        if (!isset($params['model'])) {
-            throw new OllamaException('O parâmetro "model" é obrigatório');
-        }
-
         $this->parseModelFromParams($params);
 
         if (!isset($params['messages'])) {
-            throw new OllamaException('O parâmetro "messages" é obrigatório');
+            throw RequiredParameterException::parameter('messages');
         }
+
+        $params['messages'] = $this->formatMessages($params['messages']);
 
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
             return $this->httpClient->postStream($endpoint, $params, $streamCallback);
@@ -107,13 +113,8 @@ class OpenAI
 
         $this->parseModelFromParams($params);
 
-        // Valida parâmetros obrigatórios
-        if (!isset($params['model'])) {
-            throw new OllamaException('O parâmetro "model" é obrigatório');
-        }
-
         if (!isset($params['prompt'])) {
-            throw new OllamaException('O parâmetro "prompt" é obrigatório');
+            throw RequiredParameterException::parameter('prompt');
         }
 
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
@@ -134,15 +135,10 @@ class OpenAI
     {
         $endpoint = '/embeddings';
 
-        // Valida parâmetros obrigatórios
-        if (!isset($params['model'])) {
-            throw new OllamaException('O parâmetro "model" é obrigatório');
-        }
-
         $this->parseModelFromParams($params);
 
         if (!isset($params['input'])) {
-            throw new OllamaException('O parâmetro "input" é obrigatório');
+            throw RequiredParameterException::parameter('input');
         }
 
         return $this->httpClient->post($endpoint, $params);
@@ -183,10 +179,34 @@ class OpenAI
         return $this->httpClient->get('/models/' . urlencode($model));
     }
 
-    /**
-     * Métodos auxiliares para criar requisições mais facilmente
-     */
+    public function formatMessages(array $messages, MessageFormatter $formatter = null)
+    {
+        $formatter = $formatter ?: $this->getMessageFormatter();
 
+        foreach ($messages as $i => $message) {
+            if ($message instanceof Message) {
+                $messages[$i] = $formatter->format($message);
+            }
+        }
+
+        return $messages;
+    }
+
+    public function getMessageFormatter()
+    {
+        if (!$this->messageFormatter) {
+            $this->setMessageFormatter(new OpenAIMessageFormatter());
+        }
+
+        return $this->messageFormatter;
+    }
+
+    public function setMessageFormatter(MessageFormatter $messageFormatter)
+    {
+        $this->messageFormatter = $messageFormatter;
+
+        return $this;
+    }
     /**
      * Cria uma chat completion simples
      *
@@ -199,9 +219,11 @@ class OpenAI
      */
     public function chat($model, array $messages, array $options = array(), $streamCallback = null)
     {
+        $convertedMessages = $this->formatMessages($messages);
+
         $params = array(
             'model' => $model,
-            'messages' => $messages
+            'messages' => $convertedMessages
         );
 
         $this->parseModelFromParams($params);
@@ -273,100 +295,6 @@ class OpenAI
     }
 
     /**
-     * Cria uma mensagem de chat
-     *
-     * @param string $role Papel da mensagem (system, user, assistant)
-     * @param string|array $content Conteúdo da mensagem
-     * @return array
-     */
-    public function createMessage($role, $content)
-    {
-        return array(
-            'role' => $role,
-            'content' => $content
-        );
-    }
-
-    /**
-     * Cria uma mensagem de sistema
-     *
-     * @param string $content Conteúdo da mensagem
-     * @return array
-     */
-    public function systemMessage($content)
-    {
-        return $this->createMessage('system', $content);
-    }
-
-    /**
-     * Cria uma mensagem de usuário
-     *
-     * @param string|array $content Conteúdo da mensagem (pode incluir imagens)
-     * @return array
-     */
-    public function userMessage($content)
-    {
-        return $this->createMessage('user', $content);
-    }
-
-    /**
-     * Cria uma mensagem de assistente
-     *
-     * @param string $content Conteúdo da mensagem
-     * @return array
-     */
-    public function assistantMessage($content)
-    {
-        return $this->createMessage('assistant', $content);
-    }
-
-    /**
-     * Cria uma mensagem com imagem (para modelos de visão como llava)
-     *
-     * @param string $text Texto da mensagem
-     * @param string $imageUrl URL da imagem ou dados base64
-     * @param string $role Papel da mensagem (padrão: user)
-     * @return array
-     */
-    public function imageMessage($text, $imageUrl, $role = 'user')
-    {
-        return array(
-            'role' => $role,
-            'content' => array(
-                array(
-                    'type' => 'text',
-                    'text' => $text
-                ),
-                array(
-                    'type' => 'image_url',
-                    'image_url' => is_array($imageUrl) ? $imageUrl : array('url' => $imageUrl)
-                )
-            )
-        );
-    }
-
-    /**
-     * Configura resposta em formato JSON
-     *
-     * @return array
-     */
-    public function jsonFormat()
-    {
-        return array('type' => 'json_object');
-    }
-
-    /**
-     * Configura opções de streaming
-     *
-     * @param bool $includeUsage Se deve incluir informações de uso
-     * @return array
-     */
-    public function streamOptions($includeUsage = false)
-    {
-        return array('include_usage' => $includeUsage);
-    }
-
-    /**
      * Obtém o cliente HTTP para uso avançado
      *
      * @return HttpClient
@@ -408,7 +336,6 @@ class OpenAI
         $this->complete($model, $prompt, $options, $callback);
     }
 
-
     /**
      * Método auxiliar para extrair o nome do modelo dos parâmetros
      *
@@ -417,6 +344,11 @@ class OpenAI
      */
     private function parseModelFromParams(array &$params)
     {
+        // Valida parâmetros obrigatórios
+        if (!isset($params['model'])) {
+            throw RequiredParameterException::parameter('model');
+        }
+
         if (isset($params['model'])) {
             if ($params['model'] instanceof Model) {
                 $model = $params['model'];

@@ -2,6 +2,13 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+date_default_timezone_set('America/Bahia');
+
+require __DIR__ . '/tools/CalculatorTool.php';
+require __DIR__ . '/tools/WeatherTool.php';
+
+use Examples\Tools\CalculatorTool;
+use Examples\Tools\WeatherTool;
 use Vluzrmos\Ollama\Ollama;
 use Vluzrmos\Ollama\Models\Message;
 use Vluzrmos\Ollama\Tools\ToolManager;
@@ -30,6 +37,9 @@ class ChatSystem
     private function setupTools()
     {
         $this->tools = new ToolManager();
+
+        $this->tools->registerTool(new CalculatorTool());
+        $this->tools->registerTool(new WeatherTool());
     }
 
     public function addSystemMessage($content)
@@ -116,9 +126,7 @@ class ChatSystem
 
     private function prepareMessages()
     {
-        return array_map(function ($message) {
-            return $message->toArray();
-        }, $this->messages);
+        return $this->messages;
     }
 
     public function getConversationHistory()

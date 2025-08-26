@@ -2,6 +2,7 @@
 
 namespace Examples\Tools;
 
+use Vluzrmos\Ollama\Exceptions\ToolExecutionException;
 use Vluzrmos\Ollama\Tools\AbstractTool;
 
 /**
@@ -65,11 +66,15 @@ class CalculatorTool extends AbstractTool
      */
     public function execute(array $arguments)
     {
+        echo basename(__FILE__, ".php") . ": Executing with arguments: " . json_encode($arguments) . PHP_EOL;
+
+        if (isset($arguments['a']) && !isset($arguments['b'])) {
+            $arguments['b'] = 0; // Default b to 0 if not provided
+        }
+
         // Basic validation
         if (!isset($arguments['operation']) || !isset($arguments['a']) || !isset($arguments['b'])) {
-            return json_encode(array(
-                'error' => 'Required parameters not provided: operation, a, b'
-            ));
+            throw new ToolExecutionException("Missing required parameters: operation, a, b");
         }
 
         $operation = $arguments['operation'];
@@ -90,23 +95,31 @@ class CalculatorTool extends AbstractTool
                 break;
             case 'divide':
                 if ($b == 0) {
-                    return json_encode(array(
-                        'error' => 'Division by zero is not allowed'
-                    ));
+                    return new ToolExecutionException("Division by zero is not allowed");
                 }
+
                 $result = $a / $b;
                 break;
+            case 'sqrt': 
+                if ($a < 0) {
+                    return new ToolExecutionException("Cannot compute square root of a negative number");
+                }
+
+                $result = sqrt($a);
+                break;
             default:
-                return json_encode(array(
-                    'error' => 'Unsupported operation: ' . $operation
-                ));
+                return new ToolExecutionException("Unsupported operation: " . $operation);
         }
 
-        return json_encode(array(
+        $response = [
             'operation' => $operation,
             'a' => $a,
             'b' => $b,
-            'result' => $result
-        ));
+            'result' => $result,
+        ];
+
+        echo basename(__FILE__, ".php") . ": Result: " . json_encode($response) . PHP_EOL;
+
+        return json_encode($response);
     }
 }

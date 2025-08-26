@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+date_default_timezone_set('America/Bahia');
+
 use Vluzrmos\Ollama\Ollama;
 use Vluzrmos\Ollama\Models\Message;
 
@@ -30,7 +32,7 @@ try {
     
     $response = $client->chat([
         'model' => $defaultModel,
-        'messages' => array_map(function($msg) { return $msg->toArray(); }, $messages),
+        'messages' => $messages,
         'stream' => false
     ]);
     
@@ -50,7 +52,7 @@ try {
     
     $response = $client->chat([
         'model' => $defaultModel,
-        'messages' => array_map(function($msg) { return $msg->toArray(); }, $messages),
+        'messages' => $messages,
         'stream' => false
     ]);
     
@@ -85,7 +87,7 @@ try {
     $response = $client->chat([
         'model' => $defaultModel,
         'messages' => [
-            Message::user('What is the weather in São Paulo today?')->toArray()
+            Message::user('What is the weather in São Paulo today?')
         ],
         'tools' => $tools,
         'stream' => false

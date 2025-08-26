@@ -2,10 +2,12 @@
 
 namespace Vluzrmos\Ollama\Models;
 
+use ArrayAccess;
+
 /**
  * Representa uma mensagem no chat
  */
-class Message
+class Message implements ArrayAccess
 {
     /**
      * @var string
@@ -98,33 +100,86 @@ class Message
     }
 
     /**
-     * Converte a mensagem para array
+     * Cria uma mensagem com imagem (para modelos de visão como llava)
      *
-     * @return array
+     * @param string $text Texto da mensagem
+     * @param string $imageUrl URL da imagem ou dados base64
+     * @param string $role Papel da mensagem (padrão: user)
+     * @return Message
      */
-    public function toArray()
+    public static function image($text, $imageUrl, $role = 'user')
     {
-        $data = array(
-            'role' => $this->role,
-            'content' => $this->content
-        );
+        $content = $text;
 
-        if ($this->images !== null) {
-            $data['images'] = $this->images;
+        $message = new self($role, $content);
+
+        $message->images = is_array($imageUrl) ? $imageUrl : [$imageUrl];
+
+        return $message;
+    }
+
+    public static function fromArray(array $message)
+    {
+        $role = isset($message['role']) ? $message['role'] : null;
+        $content = isset($message['content']) ? $message['content'] : null;
+        $images = isset($message['images']) ? $message['images'] : null;
+
+        if ($role === null || $content === null) {
+            throw new \InvalidArgumentException("Array must contain 'role' and 'content' keys.");
         }
 
-        if ($this->toolCalls !== null) {
-            $data['tool_calls'] = $this->toolCalls;
+        if (is_array($content) && isset($content[0]['type'])) {
+            foreach ($content as $part) {
+                if ($part['type'] === 'text') {
+                    $content = $part['text'];
+                } elseif ($part['type'] === 'image_url' && isset($part['images'])) {
+                    $images = array_merge($images, is_array($part['images']) ? $part['images'] : [$part['images']]);
+                }
+            }
         }
 
-        if ($this->toolName !== null) {
-            $data['tool_name'] = $this->toolName;
+        return new self($role, $content, $images);
+    }
+
+    protected function getAcessibleProperties()
+    {
+        return [
+            'role',
+            'content',
+            'images',
+            'toolCalls',
+            'toolName',
+            'thinking'
+        ];
+    }
+
+    public function offsetGet($offset)
+    {
+        $props = $this->getAcessibleProperties();
+
+        if (in_array($offset, $props, true)) {
+            return $this->$offset;
         }
 
-        if ($this->thinking !== null) {
-            $data['thinking'] = $this->thinking;
-        }
+        return null;
+    }
 
-        return $data;
+    public function offsetExists($offset)
+    {
+        return in_array($offset, $this->getAcessibleProperties(), true);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        if (in_array($offset, $this->getAcessibleProperties(), true)) {
+            $this->$offset = $value;
+        }
+    }
+
+    public function offsetUnset($offset)
+    {
+        if (in_array($offset, $this->getAcessibleProperties(), true)) {
+            $this->$offset = null;
+        }
     }
 }

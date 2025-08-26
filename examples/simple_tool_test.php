@@ -4,6 +4,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/tools/CalculatorTool.php';
 require_once __DIR__ . '/tools/WeatherTool.php';
 
+date_default_timezone_set('America/Bahia');
+
+
 use Vluzrmos\Ollama\Tools\ToolManager;
 use Examples\Tools\CalculatorTool;
 use Examples\Tools\WeatherTool;

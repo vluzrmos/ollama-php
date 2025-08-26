@@ -38,7 +38,7 @@ class HttpClient
             'user_agent' => 'Ollama/1.0',
             'verify_ssl' => true
         ), $options);
-        
+
         // Extrair token de API das opções se fornecido
         if (isset($options['api_token'])) {
             $this->apiToken = $options['api_token'];
@@ -106,24 +106,24 @@ class HttpClient
     {
         $url = $this->baseUrl . $endpoint;
         $jsonData = json_encode($data);
-        
+
         if ($jsonData === false) {
             throw new OllamaException('Falha ao codificar dados JSON');
         }
 
         $ch = curl_init();
-        
+
         // Preparar headers
         $headers = array(
             'Content-Type: application/json',
             'Content-Length: ' . strlen($jsonData)
         );
-        
+
         // Adicionar token de autorização se disponível
         if ($this->apiToken) {
             $headers[] = 'Authorization: Bearer ' . $this->apiToken;
         }
-        
+
         curl_setopt_array($ch, array(
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
@@ -134,13 +134,13 @@ class HttpClient
             CURLOPT_USERAGENT => $this->defaultOptions['user_agent'],
             CURLOPT_SSL_VERIFYPEER => $this->defaultOptions['verify_ssl'],
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_WRITEFUNCTION => function($ch, $data) use ($callback) {
+            CURLOPT_WRITEFUNCTION => function ($ch, $data) use ($callback) {
                 $lines = explode("\n", $data);
 
                 foreach ($lines as $line) {
                     $line = trim($line);
 
-                    if(mb_substr($line, 0, 12) === 'data: [DONE]') {
+                    if (mb_substr($line, 0, 12) === 'data: [DONE]') {
                         return strlen($data);
                     }
 
@@ -230,9 +230,9 @@ class HttpClient
     private function request($method, $endpoint, $data = null, array $headers = array(), $expectBody = true)
     {
         $url = $this->baseUrl . $endpoint;
-        
+
         $ch = curl_init();
-        
+
         $curlOptions = array(
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
@@ -245,24 +245,24 @@ class HttpClient
 
         // Headers padrão
         $defaultHeaders = array();
-        
+
         // Adicionar token de autorização se disponível
         if ($this->apiToken) {
             $defaultHeaders[] = 'Authorization: Bearer ' . $this->apiToken;
         }
-        
+
         // Preparar dados se necessário - sempre enviar como JSON
         if ($data !== null) {
             if (is_array($data) || is_object($data)) {
                 $jsonData = json_encode($data);
-                
+
                 if ($jsonData === false) {
                     throw new OllamaException('Falha ao codificar dados JSON');
                 }
 
                 $data = $jsonData;
             }
-            
+
             // Sempre definir Content-Type como JSON quando há dados
             $defaultHeaders[] = 'Content-Type: application/json';
             $curlOptions[CURLOPT_POSTFIELDS] = $data;

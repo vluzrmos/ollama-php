@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit_Framework_TestCase;
-
 /**
  * Classe base para todos os testes
  * Fornece utilitários comuns e configurações para PHP 5.6
@@ -35,7 +33,12 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      */
     protected function getTestModel()
     {
-        return getenv('TEST_MODEL') ?: 'llama3.2:1b';
+        return getenv('TEST_MODEL') ?: 'qwen2.5:3b';
+    }
+
+    protected function getTestVisionModel()
+    {
+        return getenv('TEST_VISION_MODEL') ?: 'qwen2.5vl:3b';
     }
 
     /**
@@ -58,6 +61,25 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
         if (!$this->shouldRunIntegrationTests()) {
             $this->markTestSkipped('Testes de integração desabilitados. Use RUN_INTEGRATION_TESTS=1 para habilitar.');
         }
+    }
+
+    /**
+     * Mark the test as skipped.
+     *
+     * @param string $message
+     *
+     * @throws PHPUnit_Framework_SkippedTestError
+     */
+    public static function markTestSkipped($message = '')
+    {
+        $debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+
+        if (isset($debug[0]['class']) && isset($debug[0]['function'])) {
+            echo trim($message . " (skipped in {$debug[0]['class']}::{$debug[0]['function']})");
+        }
+
+        
+        return parent::markTestSkipped($message);
     }
 
     /**

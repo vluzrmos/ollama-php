@@ -2,9 +2,9 @@
 
 require_once __DIR__ . '/../TestCase.php';
 
+use Vluzrmos\Ollama\Exceptions\RequiredParameterException;
 use Vluzrmos\Ollama\OpenAI;
 use Vluzrmos\Ollama\Models\Model;
-use Vluzrmos\Ollama\Exceptions\OllamaException;
 
 class OpenAITest extends TestCase
 {
@@ -51,8 +51,8 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
-        $this->expectExceptionMessage('O parâmetro "model" é obrigatório');
+        $this->expectException(RequiredParameterException::class);
+        $this->expectExceptionMessage('parameter "model" is required');
         
         $client->chatCompletions(array(
             'messages' => array(array('role' => 'user', 'content' => 'Hello'))
@@ -63,8 +63,8 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
-        $this->expectExceptionMessage('O parâmetro "messages" é obrigatório');
+        $this->expectException(RequiredParameterException::class);
+        $this->expectExceptionMessage('parameter "messages" is required');
         
         $client->chatCompletions(array(
             'model' => 'llama3.2:1b'
@@ -75,8 +75,8 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
-        $this->expectExceptionMessage('O parâmetro "model" é obrigatório');
+        $this->expectException(RequiredParameterException::class);
+        $this->expectExceptionMessage('parameter "model" is required');
         
         $client->completions(array(
             'prompt' => 'Hello'
@@ -87,8 +87,8 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
-        $this->expectExceptionMessage('O parâmetro "prompt" é obrigatório');
+        $this->expectException(RequiredParameterException::class);
+        $this->expectExceptionMessage('parameter "prompt" is required');
         
         $client->completions(array(
             'model' => 'llama3.2:1b'
@@ -99,8 +99,8 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
-        $this->expectExceptionMessage('O parâmetro "model" é obrigatório');
+        $this->expectException(RequiredParameterException::class);
+        $this->expectExceptionMessage('parameter "model" is required');
         
         $client->embeddings(array(
             'input' => 'Hello world'
@@ -111,8 +111,8 @@ class OpenAITest extends TestCase
     {
         $client = new OpenAI();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\OllamaException');
-        $this->expectExceptionMessage('O parâmetro "input" é obrigatório');
+        $this->expectException(RequiredParameterException::class);
+        $this->expectExceptionMessage('parameter "input" is required');
         
         $client->embeddings(array(
             'model' => 'llama3.2:1b'
@@ -231,117 +231,6 @@ class OpenAITest extends TestCase
         $result = $client->embed('llama3.2:1b', 'Hello world');
 
         $this->assertArrayHasKeys(array('object', 'data', 'model', 'usage'), $result);
-    }
-
-    public function testCreateMessage()
-    {
-        $client = new OpenAI();
-        
-        $message = $client->createMessage('user', 'Hello');
-        
-        $this->assertEquals(array(
-            'role' => 'user',
-            'content' => 'Hello'
-        ), $message);
-    }
-
-    public function testSystemMessage()
-    {
-        $client = new OpenAI();
-        
-        $message = $client->systemMessage('You are a helpful assistant');
-        
-        $this->assertEquals(array(
-            'role' => 'system',
-            'content' => 'You are a helpful assistant'
-        ), $message);
-    }
-
-    public function testUserMessage()
-    {
-        $client = new OpenAI();
-        
-        $message = $client->userMessage('Hello');
-        
-        $this->assertEquals(array(
-            'role' => 'user',
-            'content' => 'Hello'
-        ), $message);
-    }
-
-    public function testAssistantMessage()
-    {
-        $client = new OpenAI();
-        
-        $message = $client->assistantMessage('Hi there!');
-        
-        $this->assertEquals(array(
-            'role' => 'assistant',
-            'content' => 'Hi there!'
-        ), $message);
-    }
-
-    public function testImageMessage()
-    {
-        $client = new OpenAI();
-        
-        $message = $client->imageMessage('What is in this image?', 'data:image/jpeg;base64,/9j/...');
-        
-        $expectedMessage = array(
-            'role' => 'user',
-            'content' => array(
-                array(
-                    'type' => 'text',
-                    'text' => 'What is in this image?'
-                ),
-                array(
-                    'type' => 'image_url',
-                    'image_url' => array('url' => 'data:image/jpeg;base64,/9j/...')
-                )
-            )
-        );
-        
-        $this->assertEquals($expectedMessage, $message);
-    }
-
-    public function testImageMessageWithArrayUrl()
-    {
-        $client = new OpenAI();
-        
-        $imageUrl = array('url' => 'http://example.com/image.jpg', 'detail' => 'high');
-        $message = $client->imageMessage('Describe this image', $imageUrl);
-        
-        $this->assertEquals('user', $message['role']);
-        $this->assertEquals($imageUrl, $message['content'][1]['image_url']);
-    }
-
-    public function testImageMessageWithCustomRole()
-    {
-        $client = new OpenAI();
-        
-        $message = $client->imageMessage('What do you see?', 'http://example.com/image.jpg', 'assistant');
-        
-        $this->assertEquals('assistant', $message['role']);
-    }
-
-    public function testJsonFormat()
-    {
-        $client = new OpenAI();
-        
-        $format = $client->jsonFormat();
-        
-        $this->assertEquals(array('type' => 'json_object'), $format);
-    }
-
-    public function testStreamOptions()
-    {
-        $client = new OpenAI();
-        
-        $options = $client->streamOptions();
-        $this->assertEquals(array('include_usage' => false), $options);
-        
-        $optionsWithUsage = $client->streamOptions(true);
-        $this->assertEquals(array('include_usage' => true), $optionsWithUsage);
     }
 
     public function testRetrieveModelWithString()

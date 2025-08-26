@@ -15,7 +15,6 @@ class OllamaTest extends TestCase
         
         $this->assertInstanceOf('Vluzrmos\\Ollama\\Ollama', $client);
         $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $client->getToolManager());
     }
 
     public function testOllamaCreationWithParameters()
@@ -26,7 +25,6 @@ class OllamaTest extends TestCase
         $client = new Ollama($baseUrl, $options);
         
         $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $client->getToolManager());
     }
 
     public function testDefaultBaseUrl()
@@ -459,80 +457,5 @@ class OllamaTest extends TestCase
 
         $this->assertArrayHasKey('success', $result);
         $this->assertTrue($result['success']);
-    }
-
-    public function testToolManagerMethods()
-    {
-        $client = new Ollama();
-        $toolManager = $client->getToolManager();
-        
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Tools\\ToolManager', $toolManager);
-        
-        // Testa métodos que delegam para o ToolManager
-        $this->assertTrue(method_exists($client, 'registerTool'));
-        $this->assertTrue(method_exists($client, 'executeTool'));
-        $this->assertTrue(method_exists($client, 'listAvailableTools'));
-        $this->assertTrue(method_exists($client, 'getToolsForAPI'));
-    }
-
-    public function testChatWithTools()
-    {
-        $mockClient = $this->createHttpClientMock();
-        $mockClient->expects($this->once())
-                  ->method('post')
-                  ->with(
-                      $this->equalTo('/api/chat'),
-                      $this->callback(function($params) {
-                          // Como não há tools registradas, o campo tools não deve existir
-                          return isset($params['model']) &&
-                                 $params['model'] === 'llama3.2:1b' &&
-                                 !isset($params['tools']);
-                      })
-                  )
-                  ->willReturn(array('message' => array('content' => 'Chat with tools response')));
-
-        $client = new Ollama();
-        
-        // Usar reflection para substituir o HttpClient
-        $reflection = new ReflectionClass($client);
-        $httpClientProperty = $reflection->getProperty('httpClient');
-        $httpClientProperty->setAccessible(true);
-        $httpClientProperty->setValue($client, $mockClient);
-
-        $result = $client->chatWithTools(array(
-            'model' => 'llama3.2:1b',
-            'messages' => array(array('role' => 'user', 'content' => 'Hello'))
-        ));
-
-        $this->assertArrayHasKey('message', $result);
-    }
-
-    public function testChatWithToolsDisabled()
-    {
-        $mockClient = $this->createHttpClientMock();
-        $mockClient->expects($this->once())
-                  ->method('post')
-                  ->with(
-                      $this->equalTo('/api/chat'),
-                      $this->callback(function($params) {
-                          return !isset($params['tools']);
-                      })
-                  )
-                  ->willReturn(array('message' => array('content' => 'Chat without tools response')));
-
-        $client = new Ollama();
-        
-        // Usar reflection para substituir o HttpClient
-        $reflection = new ReflectionClass($client);
-        $httpClientProperty = $reflection->getProperty('httpClient');
-        $httpClientProperty->setAccessible(true);
-        $httpClientProperty->setValue($client, $mockClient);
-
-        $result = $client->chatWithTools(array(
-            'model' => 'llama3.2:1b',
-            'messages' => array(array('role' => 'user', 'content' => 'Hello'))
-        ), null, false);
-
-        $this->assertArrayHasKey('message', $result);
     }
 }

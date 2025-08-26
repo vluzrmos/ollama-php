@@ -3,9 +3,12 @@
 namespace Vluzrmos\Ollama;
 
 use Vluzrmos\Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Exceptions\RequiredParameterException;
 use Vluzrmos\Ollama\Http\HttpClient;
+use Vluzrmos\Ollama\Models\Message;
+use Vluzrmos\Ollama\Models\MessageFormatter;
 use Vluzrmos\Ollama\Models\Model;
-use Vluzrmos\Ollama\Tools\ToolManager;
+use Vluzrmos\Ollama\Models\OllamaMessageFormatter;
 
 /**
  * Cliente principal para a API do Ollama
@@ -22,20 +25,21 @@ class Ollama
      */
     private $baseUrl;
 
+
     /**
-     * @var ToolManager
+     * @var MessageFormatter|null
      */
-    private $toolManager;
+    private $messageFormatter;
 
     /**
      * @param string $baseUrl URL base do servidor Ollama (ex: http://localhost:11434)
      * @param array $options Opções adicionais para configuração
      */
-    public function __construct($baseUrl = 'http://localhost:11434', array $options = array())
+    public function __construct($baseUrl = 'http://localhost:11434', array $options = array(), MessageFormatter $messageFormatter = null)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->httpClient = new HttpClient($this->baseUrl, $options);
-        $this->toolManager = new ToolManager();
+        $this->messageFormatter = $messageFormatter;
     }
 
     /**
@@ -94,12 +98,44 @@ class Ollama
         $endpoint = '/api/chat';
 
         $this->parseModelFromParams($params);
+        $this->formatMessagesFromParams($params);
         
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
             return $this->httpClient->postStream($endpoint, $params, $streamCallback);
         }
         
         return $this->httpClient->post($endpoint, $params);
+    }
+
+    protected function formatMessagesFromParams(array &$params)
+    {
+        if (empty($params['messages']) || !is_array($params['messages'])) {
+            return;
+        }
+
+        $formatter = $this->getMessageFormatter();
+
+        foreach ($params['messages'] as $i => $message) {
+            if ($message instanceof Message) {
+                $params['messages'][$i] = $formatter->format($message);
+            }
+        }
+    }
+
+    public function getMessageFormatter()
+    {
+        if (!$this->messageFormatter) {
+            $this->setMessageFormatter(new OllamaMessageFormatter());
+        }
+
+        return $this->messageFormatter;
+    }
+
+    public function setMessageFormatter(MessageFormatter $formatter)
+    {
+        $this->messageFormatter = $formatter;
+
+        return $this;
     }
 
     /**
@@ -109,7 +145,11 @@ class Ollama
      */
     private function parseModelFromParams(array &$params)
     {
-        if (!empty($params['model']) && $params['model'] instanceof Model) {
+        if (empty($params['model'])) {
+            throw RequiredParameterException::parameter('model');
+        }
+
+        if ($params['model'] instanceof Model) {
             $model= $params['model'];
             $params['model'] = $model->getName();
             $params['options'] = (object) $model->getOptions();
@@ -324,79 +364,5 @@ class Ollama
     public function getHttpClient()
     {
         return $this->httpClient;
-    }
-
-    /**
-     * Obtém o gerenciador de tools
-     *
-     * @return ToolManager
-     */
-    public function getToolManager()
-    {
-        return $this->toolManager;
-    }
-
-    /**
-     * Registra uma nova tool
-     *
-     * @param \Ollama\Tools\ToolInterface $tool
-     * @return void
-     */
-    public function registerTool($tool)
-    {
-        $this->toolManager->registerTool($tool);
-    }
-
-    /**
-     * Executa uma tool pelo nome
-     *
-     * @param string $toolName
-     * @param array $arguments
-     * @return string
-     */
-    public function executeTool($toolName, array $arguments)
-    {
-        return $this->toolManager->executeTool($toolName, $arguments);
-    }
-
-    /**
-     * Lista todas as tools disponíveis
-     *
-     * @return array
-     */
-    public function listAvailableTools()
-    {
-        return $this->toolManager->listTools();
-    }
-
-    /**
-     * Obtém tools no formato esperado pela API
-     *
-     * @return array
-     */
-    public function getToolsForAPI()
-    {
-        return $this->toolManager->jsonSerialize();
-    }
-
-    /**
-     * Gera uma chat completion com suporte a tools
-     *
-     * @param array $params Parâmetros da requisição
-     * @param callable|null $streamCallback Callback para streaming (opcional)
-     * @param bool $enableTools Se deve incluir tools na requisição
-     * @return array
-     * @throws OllamaException
-     */
-    public function chatWithTools(array $params, $streamCallback = null, $enableTools = true)
-    {
-        if ($enableTools) {
-            $tools = $this->getToolsForAPI();
-            if (!empty($tools)) {
-                $params['tools'] = $tools;
-            }
-        }
-
-        return $this->chat($params, $streamCallback);
     }
 }

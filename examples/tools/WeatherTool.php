@@ -2,6 +2,7 @@
 
 namespace Examples\Tools;
 
+use Vluzrmos\Ollama\Exceptions\ToolExecutionException;
 use Vluzrmos\Ollama\Tools\AbstractTool;
 
 /**
@@ -62,10 +63,10 @@ class WeatherTool extends AbstractTool
      */
     public function execute(array $arguments)
     {
+        echo basename(__FILE__, ".php") . ": Executing with arguments: " . json_encode($arguments) . PHP_EOL;
+
         if (!isset($arguments['location'])) {
-            return json_encode(array(
-                'error' => 'Location is required'
-            ));
+            throw new ToolExecutionException("Missing required parameter: location");
         }
 
         $location = $arguments['location'];
@@ -117,7 +118,7 @@ class WeatherTool extends AbstractTool
 
         // Convert to Fahrenheit if requested
         if ($unit === 'fahrenheit') {
-            $temperature = ($temperature * 9/5) + 32;
+            $temperature = ($temperature * 9 / 5) + 32;
         }
 
         return array(

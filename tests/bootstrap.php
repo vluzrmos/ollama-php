@@ -19,7 +19,11 @@ if (!getenv('OPENAI_API_URL')) {
 }
 
 if (!getenv('TEST_MODEL')) {
-    putenv('TEST_MODEL=llama3.2:1b');
+    putenv('TEST_MODEL=qwen2.5:3b');
+}
+
+if (!getenv('TEST_VISION_MODEL')) {
+    putenv('TEST_VISION_MODEL=qwen2.5vl:3b');
 }
 
 if (!getenv('RUN_INTEGRATION_TESTS')) {
@@ -63,4 +67,5 @@ echo "Bootstrap concluído.\n";
 echo "OLLAMA_API_URL: " . getenv('OLLAMA_API_URL') . "\n";
 echo "OPENAI_API_URL: " . getenv('OPENAI_API_URL') . "\n";
 echo "TEST_MODEL: " . getenv('TEST_MODEL') . "\n";
+echo "TEST_VISION_MODEL: " . getenv('TEST_VISION_MODEL') . "\n";
 echo "RUN_INTEGRATION_TESTS: " . getenv('RUN_INTEGRATION_TESTS') . "\n";
