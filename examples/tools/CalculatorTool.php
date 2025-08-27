@@ -43,7 +43,7 @@ class CalculatorTool extends AbstractTool
                 'operation' => [
                     'type' => 'string',
                     'description' => 'Mathematical operation to perform',
-                    'enum' => ['add', 'subtract', 'multiply', 'divide']
+                    'enum' => ['add', 'subtract', 'multiply', 'divide', 'sqrt']
                 ],
                 'a' => [
                     'type' => 'number',

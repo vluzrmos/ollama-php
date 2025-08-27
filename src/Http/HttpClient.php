@@ -2,23 +2,36 @@
 
 namespace Vluzrmos\Ollama\Http;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use Psr\Http\Message\ResponseInterface;
 use Vluzrmos\Ollama\Exceptions\HttpException;
 use Vluzrmos\Ollama\Exceptions\OllamaException;
 
 /**
- * Cliente HTTP para comunicação com a API do Ollama
+ * HTTP Client for communicating with the Ollama API using Guzzle
  */
 class HttpClient
 {
+    /**
+     * @var Client
+     */
+    private $client;
+
     /**
      * @var string
      */
     private $baseUrl;
 
     /**
-     * @var array
+     * Sets whether to always concatenate path to base URL
+     *
+     * @var boolean
      */
-    private $defaultOptions;
+    private $alwaysConcatenatePath = true;
 
     /**
      * @var string|null
@@ -31,18 +44,50 @@ class HttpClient
      */
     public function __construct($baseUrl, array $options = [])
     {
-        $this->baseUrl = rtrim($baseUrl, '/');
-        $this->defaultOptions = array_merge([
+        $this->setBaseUrl($baseUrl);
+
+        // Default options
+        $defaultOptions = [
             'timeout' => 300,
             'connect_timeout' => 30,
-            'user_agent' => 'Ollama/1.0',
-            'verify_ssl' => true
-        ], $options);
+            'verify' => true,
+            'headers' => [
+                'User-Agent' => 'Ollama/1.0'
+            ]
+        ];
+
+        // Merge with provided options
+        $clientOptions = array_merge($defaultOptions, $options);
 
         // Extract API token from options if provided
         if (isset($options['api_token'])) {
             $this->apiToken = $options['api_token'];
         }
+
+        // Set base_uri for Guzzle
+        $clientOptions['base_uri'] = $this->baseUrl;
+
+        $this->client = new Client($clientOptions);
+    }
+
+    public function setBaseUrl($baseUrl)
+    {
+        if ($this->alwaysConcatenatePath) {
+            $baseUrl = rtrim($baseUrl, '/').'/';
+        }
+
+        $this->baseUrl = $baseUrl;
+    }
+
+    /**
+     * Sets whether to always concatenate path to base URL
+     *
+     * @param boolean $concatenate
+     * @return void
+     */
+    public function setAlwaysConcatenatePath($concatenate = true)
+    {
+        $this->alwaysConcatenatePath = (bool) $concatenate;
     }
 
     /**
@@ -67,7 +112,67 @@ class HttpClient
     }
 
     /**
-     * Realiza uma requisição GET
+     * Build headers array with authentication if available
+     *
+     * @param array $additionalHeaders
+     * @return array
+     */
+    private function buildHeaders(array $additionalHeaders = [])
+    {
+        $headers = $additionalHeaders;
+        
+        if ($this->apiToken) {
+            $headers['Authorization'] = 'Bearer ' . $this->apiToken;
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Handle Guzzle exceptions and convert to appropriate exception types
+     *
+     * @param RequestException $e
+     * @throws HttpException
+     * @throws OllamaException
+     */
+    private function handleException(RequestException $e)
+    {
+        if ($e instanceof ConnectException) {
+            throw new HttpException('Connection Error: ' . $e->getMessage(), 0, $e);
+        }
+
+        if ($e instanceof ClientException || $e instanceof ServerException) {
+            $response = $e->getResponse();
+            $statusCode = $response->getStatusCode();
+            $body = (string) $response->getBody();
+            
+            $errorData = null;
+            if (!empty($body)) {
+                $decoded = json_decode($body, true);
+                if ($decoded !== null) {
+                    $errorData = $decoded;
+                }
+            }
+            
+            throw new HttpException('HTTP Error: ' . $statusCode, $statusCode, $e, $errorData);
+        }
+
+        throw new OllamaException('Request Error: ' . $e->getMessage(), 0, $e);
+    }
+
+    public function request($method, $endpoint, $options = [])
+    {
+        if ($this->alwaysConcatenatePath) {
+            $endpoint = ltrim($endpoint, '/');
+        }
+
+        $options['headers'] = $this->buildHeaders(isset($options['headers']) ? $options['headers'] : []);
+        
+        return $this->client->request($method, $endpoint, $options);
+    }
+
+    /**
+     * Makes a GET request
      *
      * @param string $endpoint
      * @param array $headers
@@ -76,11 +181,17 @@ class HttpClient
      */
     public function get($endpoint, array $headers = [])
     {
-        return $this->request('GET', $endpoint, null, $headers);
+        try {
+            $response = $this->request('GET', $endpoint);
+
+            return $this->processResponse($response);
+        } catch (RequestException $e) {
+            $this->handleException($e);
+        }
     }
 
     /**
-     * Realiza uma requisição POST
+     * Makes a POST request
      *
      * @param string $endpoint
      * @param array|string $data
@@ -90,11 +201,47 @@ class HttpClient
      */
     public function post($endpoint, $data = null, array $headers = [])
     {
-        return $this->request('POST', $endpoint, $data, $headers);
+        try {
+            $options = [];
+
+            if ($data !== null) {
+                $options['headers']['Content-Type'] = 'application/json';
+                $options['json'] = $data;
+            }
+
+            $response = $this->request('POST', $endpoint, $options);
+
+            return $this->processResponse($response);
+        } catch (RequestException $e) {
+            $this->handleException($e);
+        }
     }
 
     /**
-     * Realiza uma requisição POST com streaming
+     * Process HTTP response and decode JSON
+     *
+     * @param ResponseInterface $response
+     * @return array
+     * @throws OllamaException
+     */
+    private function processResponse(ResponseInterface $response)
+    {
+        $body = (string) $response->getBody();
+        
+        if (empty($body)) {
+            return ['http_code' => $response->getStatusCode(), 'body' => ''];
+        }
+
+        $decoded = json_decode($body, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            throw new OllamaException('Failed to decode JSON response: ' . json_last_error_msg());
+        }
+        
+        return $decoded ?: ['http_code' => $response->getStatusCode(), 'body' => $body];
+    }
+
+    /**
+     * Makes a POST request with streaming
      *
      * @param string $endpoint
      * @param array $data
@@ -104,79 +251,66 @@ class HttpClient
      */
     public function postStream($endpoint, array $data, $callback)
     {
-        $url = $this->baseUrl . $endpoint;
-        $jsonData = json_encode($data);
+        try {
+            $options = [
+                'headers' => [
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => $data,
+                'stream' => true
+            ];
 
-        if ($jsonData === false) {
-            throw new OllamaException('Failed to encode JSON data');
-        }
+            $response = $this->request('POST', $endpoint, $options);
+            $body = $response->getBody();
 
-        $ch = curl_init();
+            while (!$body->eof()) {
+                $line = $this->readLine($body);
+                $line = trim($line);
 
-        // Prepare headers
-        $headers = [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($jsonData)
-        ];
+                if (mb_substr($line, 0, 12) === 'data: [DONE]') {
+                    break;
+                }
 
-        // Add authorization token if available
-        if ($this->apiToken) {
-            $headers[] = 'Authorization: Bearer ' . $this->apiToken;
-        }
+                if (mb_substr($line, 0, 6) === 'data: ') {
+                    $line = mb_substr($line, 6);
+                }
 
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $jsonData,
-            CURLOPT_RETURNTRANSFER => false,
-            CURLOPT_TIMEOUT => $this->defaultOptions['timeout'],
-            CURLOPT_CONNECTTIMEOUT => $this->defaultOptions['connect_timeout'],
-            CURLOPT_USERAGENT => $this->defaultOptions['user_agent'],
-            CURLOPT_SSL_VERIFYPEER => $this->defaultOptions['verify_ssl'],
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_WRITEFUNCTION => function ($ch, $data) use ($callback) {
-                $lines = explode("\n", $data);
-
-                foreach ($lines as $line) {
-                    $line = trim($line);
-
-                    if (mb_substr($line, 0, 12) === 'data: [DONE]') {
-                        return strlen($data);
-                    }
-
-                    if (mb_substr($line, 0, 6) === 'data: ') {
-                        $line = mb_substr($line, 6);
-                    }
-
-                    if (!empty($line)) {
-                        $decoded = json_decode($line, true);
-                        if ($decoded !== null) {
-                            call_user_func($callback, $decoded);
-                        }
+                if (!empty($line)) {
+                    $decoded = json_decode($line, true);
+                    if ($decoded !== null) {
+                        call_user_func($callback, $decoded);
                     }
                 }
-                return strlen($data);
             }
-        ]);
 
-        $success = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($success === false) {
-            throw new HttpException('Erro cURL: ' . $error);
+            $body->close();
+            return ['success' => true];
+        } catch (RequestException $e) {
+            $this->handleException($e);
         }
-
-        if ($httpCode >= 400) {
-            throw new HttpException('Erro HTTP: ' . $httpCode);
-        }
-
-        return ['success' => true];
     }
 
     /**
-     * Realiza uma requisição PUT
+     * Read a line from stream
+     *
+     * @param mixed $stream
+     * @return string
+     */
+    private function readLine($stream)
+    {
+        $line = '';
+        while (!$stream->eof()) {
+            $char = $stream->read(1);
+            if ($char === "\n") {
+                break;
+            }
+            $line .= $char;
+        }
+        return $line;
+    }
+
+    /**
+     * Makes a PUT request
      *
      * @param string $endpoint
      * @param array|string $data
@@ -186,11 +320,24 @@ class HttpClient
      */
     public function put($endpoint, $data, array $headers = [])
     {
-        return $this->request('PUT', $endpoint, $data, $headers);
+        try {
+            $options = [];
+
+            if ($data !== null) {
+                $options['headers']['Content-Type'] = 'application/json';
+                $options['json'] = $data;
+            }
+
+            $response = $this->request('PUT', $endpoint, $options);
+
+            return $this->processResponse($response);
+        } catch (RequestException $e) {
+            $this->handleException($e);
+        }
     }
 
     /**
-     * Realiza uma requisição DELETE
+     * Makes a DELETE request
      *
      * @param string $endpoint
      * @param array $data
@@ -200,11 +347,24 @@ class HttpClient
      */
     public function delete($endpoint, array $data = null, array $headers = [])
     {
-        return $this->request('DELETE', $endpoint, $data, $headers);
+        try {
+            $options = [];
+
+            if ($data !== null) {
+                $options['headers']['Content-Type'] = 'application/json';
+                $options['json'] = $data;
+            }
+
+            $response = $this->request('DELETE', $endpoint, $options);
+
+            return $this->processResponse($response);
+        } catch (RequestException $e) {
+            $this->handleException($e);
+        }
     }
 
     /**
-     * Realiza uma requisição HEAD
+     * Makes a HEAD request
      *
      * @param string $endpoint
      * @param array $headers
@@ -213,111 +373,14 @@ class HttpClient
      */
     public function head($endpoint, array $headers = [])
     {
-        return $this->request('HEAD', $endpoint, null, $headers, false);
-    }
+        try {
+            $response = $this->request('HEAD', $endpoint, [
+                'headers' => $headers
+            ]);
 
-    /**
-     * Realiza uma requisição HTTP
-     *
-     * @param string $method
-     * @param string $endpoint
-     * @param mixed $data
-     * @param array $headers
-     * @param bool $expectBody
-     * @return array
-     * @throws OllamaException
-     */
-    private function request($method, $endpoint, $data = null, array $headers = [], $expectBody = true)
-    {
-        $url = $this->baseUrl . $endpoint;
-
-        $ch = curl_init();
-
-        $curlOptions = [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $this->defaultOptions['timeout'],
-            CURLOPT_CONNECTTIMEOUT => $this->defaultOptions['connect_timeout'],
-            CURLOPT_USERAGENT => $this->defaultOptions['user_agent'],
-            CURLOPT_SSL_VERIFYPEER => $this->defaultOptions['verify_ssl'],
-            CURLOPT_CUSTOMREQUEST => $method
-        ];
-
-        // Default headers
-        $defaultHeaders = [];
-
-        // Add authorization token if available
-        if ($this->apiToken) {
-            $defaultHeaders[] = 'Authorization: Bearer ' . $this->apiToken;
+            return ['http_code' => $response->getStatusCode()];
+        } catch (RequestException $e) {
+            $this->handleException($e);
         }
-
-        // Prepare data if needed - always send as JSON
-        if ($data !== null) {
-            if (is_array($data) || is_object($data)) {
-                $jsonData = json_encode($data);
-
-                if ($jsonData === false) {
-                    throw new OllamaException('Failed to encode JSON data');
-                }
-
-                $data = $jsonData;
-            }
-
-            // Always set Content-Type as JSON when there's data
-            $defaultHeaders[] = 'Content-Type: application/json';
-            $curlOptions[CURLOPT_POSTFIELDS] = $data;
-        }
-
-        // Merge headers
-        $allHeaders = array_merge($defaultHeaders, $headers);
-        if (!empty($allHeaders)) {
-            $curlOptions[CURLOPT_HTTPHEADER] = $allHeaders;
-        }
-
-        // Method-specific configurations
-        switch ($method) {
-            case 'HEAD':
-                $curlOptions[CURLOPT_NOBODY] = true;
-                break;
-        }
-
-        curl_setopt_array($ch, $curlOptions);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($response === false) {
-            throw new HttpException('cURL Error: ' . $error);
-        }
-
-        // For HEAD requests, we only need to check the HTTP code
-        if ($method === 'HEAD') {
-            if ($httpCode >= 400) {
-                throw new HttpException('HTTP Error: ' . $httpCode, $httpCode);
-            }
-            return ['http_code' => $httpCode];
-        }
-
-        // Check HTTP code
-        if ($httpCode >= 400) {
-            $errorData = null;
-            if (!empty($response)) {
-                $errorData = json_decode($response, true);
-            }
-            throw new HttpException('HTTP Error: ' . $httpCode, $httpCode, null, $errorData);
-        }
-
-        // Decode JSON response if we expect a body
-        if ($expectBody && !empty($response)) {
-            $decoded = json_decode($response, true);
-            if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
-                throw new OllamaException('Failed to decode JSON response: ' . json_last_error_msg());
-            }
-            return $decoded;
-        }
-
-        return ['http_code' => $httpCode, 'body' => $response];
     }
 }

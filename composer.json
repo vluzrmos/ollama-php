@@ -13,7 +13,8 @@
     "require": {
         "php": ">=5.6.0",
         "ext-curl": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.5"
     },
     "require-dev": {
         "ext-xdebug": "*",
@@ -36,5 +37,9 @@
         "llm",
         "api",
         "php56"
-    ]
+    ],
+    "config" : {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
 }
