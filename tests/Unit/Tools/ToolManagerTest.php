@@ -192,11 +192,8 @@ class ToolManagerTest extends TestCase
     public function testExecuteNonExistentTool()
     {
         $result = $this->toolManager->executeTool('nonexistent', []);
-        
-        $jsonResult = json_decode($result, true);
-        $this->assertTrue(is_array($jsonResult));
-        $this->assertArrayHasKey('error', $jsonResult);
-        $this->assertContains('Tool not found', $jsonResult['error']);
+
+        $this->assertNull($result);
     }
 
     public function testHasTool()

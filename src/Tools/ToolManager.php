@@ -109,10 +109,9 @@ class ToolManager implements JsonSerializable
     public function executeTool($toolName, array $arguments)
     {
         $tool = $this->getTool($toolName);
+
         if ($tool === null) {
-            return json_encode([
-                'error' => 'Tool not found: ' . $toolName
-            ]);
+            return null;
         }
 
         return $tool->execute($arguments);

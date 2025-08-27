@@ -6,6 +6,7 @@ $files = [
     __DIR__.'/openai_usage.php',
     __DIR__.'/simple_tool_test.php',
     __DIR__.'/tool_execution_demo.php',
+    __DIR__.'/brasilapi.php',
 ];
 
 
