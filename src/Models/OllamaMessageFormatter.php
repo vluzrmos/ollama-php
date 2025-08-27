@@ -27,6 +27,10 @@ class OllamaMessageFormatter implements MessageFormatter
             $data['thinking'] = $message->thinking;
         }
 
+        if ($message->toolCallId !== null) {
+            $data['tool_call_id'] = $message->toolCallId;
+        }
+
         return $data;
     }
 }

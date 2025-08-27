@@ -11,6 +11,7 @@ use Examples\Tools\CalculatorTool;
 use Examples\Tools\WeatherTool;
 use Vluzrmos\Ollama\Ollama;
 use Vluzrmos\Ollama\Models\Message;
+use Vluzrmos\Ollama\Tools\TimeTool;
 use Vluzrmos\Ollama\Tools\ToolManager;
 use Vluzrmos\Ollama\Utils\ImageHelper;
 
@@ -40,6 +41,7 @@ class ChatSystem
 
         $this->tools->registerTool(new CalculatorTool());
         $this->tools->registerTool(new WeatherTool());
+        $this->tools->registerTool((new TimeTool())->setTimezone('America/Sao_Paulo'));
     }
 
     public function addSystemMessage($content)

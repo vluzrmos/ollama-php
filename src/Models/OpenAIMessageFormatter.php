@@ -41,6 +41,10 @@ class OpenAIMessageFormatter implements MessageFormatter
             $data['thinking'] = $message->thinking;
         }
 
+        if (!empty($message->toolCallId)) {
+            $data['tool_call_id'] = $message->toolCallId;
+        }
+
         return $data;
     }
 }
