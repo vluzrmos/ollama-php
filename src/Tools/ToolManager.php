@@ -13,7 +13,7 @@ use Vluzrmos\Ollama\Models\Message;
 class ToolManager implements JsonSerializable
 {
     /**
-     * @var array
+     * @var array<string,ToolInterface>
      */
     private $tools;
 
@@ -143,10 +143,12 @@ class ToolManager implements JsonSerializable
         foreach ($toolCalls as $toolCall) {
             // Validate tool call structure
             if (!isset($toolCall['function'])) {
-                $results[] = array(
-                    'id' => isset($toolCall['id']) ? $toolCall['id'] : null,
-                    'error' => 'Invalid tool call, function name not specified',
-                    'success' => false
+                $results[] = new ToolCallResult(
+                    'invalid_function_name_'.uniqid(),
+                    null,
+                    false,
+                    'Invalid tool call, function name not specified',
+                    isset($toolCall['id']) ? $toolCall['id'] : null
                 );
 
                 continue;
@@ -156,25 +158,18 @@ class ToolManager implements JsonSerializable
             $toolName = $function['name'];
             $toolId = isset($toolCall['id']) ? $toolCall['id'] : null;
 
-            // Decode arguments (which may come as JSON string)
-            $arguments = array();
-            if (isset($function['arguments'])) {
-                if (is_string($function['arguments'])) {
-                    $decodedArgs = json_decode($function['arguments'], true);
-                    if (json_last_error() === JSON_ERROR_NONE) {
-                        $arguments = $decodedArgs;
-                    } else {
-                        $results[] = array(
-                            'id' => $toolId,
-                            'error' => 'Invalid JSON arguments: ' . json_last_error_msg(),
-                            'success' => false,
-                            'tool_name' => $toolName
-                        );
-                        continue;
-                    }
-                } else if (is_array($function['arguments'])) {
-                    $arguments = $function['arguments'];
-                }
+            try {
+                $arguments = $this->decodeToolCallArguments(isset($function['arguments']) ? $function['arguments'] : null);
+            } catch (\InvalidArgumentException $e) {
+                $results[] = new ToolCallResult(
+                    $toolName,
+                    null,
+                    false,
+                    $e->getMessage(),
+                    $toolId
+                );
+
+                continue;
             }
 
             // Execute the tool
@@ -185,11 +180,12 @@ class ToolManager implements JsonSerializable
 
                 $result = $this->executeTool($toolName, $arguments);
 
-                $results[] = array(
-                    'id' => $toolId,
-                    'result' => $result,
-                    'success' => true,
-                    'tool_name' => $toolName
+                $results[] = new ToolCallResult(
+                    $toolName,
+                    $result,
+                    true,
+                    null,
+                    $toolId
                 );
             } catch (\Exception $e) {
                 if ($e instanceof ToolExecutionException) {
@@ -198,11 +194,12 @@ class ToolManager implements JsonSerializable
                     $message = "Error executing tool \"{$toolName}\"". ($toolId? " (id: {$toolId})" : "");
                 }
 
-                $results[] = array(
-                    'id' => $toolId,
-                    'error' => $message,
-                    'success' => false,
-                    'tool_name' => $toolName
+                $results[] = new ToolCallResult(
+                    $toolName,
+                    null,
+                    false,
+                    $message,
+                    $toolId
                 );
             }
         }
@@ -210,10 +207,28 @@ class ToolManager implements JsonSerializable
         return $results;
     }
 
+    public function decodeToolCallArguments($arguments) {
+        if (empty($arguments)) {
+            return [];
+        }
+
+        if (is_array($arguments)) {
+            return $arguments;
+        }
+
+        $arguments = json_decode($arguments, true);
+        
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $arguments;
+        }
+
+        throw new \InvalidArgumentException('Invalid JSON arguments: ' . json_last_error_msg());            
+    }
+
     /**
      * Converts tool call results to response message format
      * 
-     * @param array $toolCallResults Results from executeToolCalls method
+     * @param array<mixed,ToolCallResult> $toolCallResults Results from executeToolCalls method
      * @return array Array of messages in the expected API format
      */
     public function toolCallResultsToMessages(array $toolCallResults)
@@ -221,28 +236,7 @@ class ToolManager implements JsonSerializable
         $messages = [];
 
         foreach ($toolCallResults as $result) {
-            $content = '';
-
-            if ($result['success']) {
-                $content = is_string($result['result']) ? $result['result'] : json_encode($result['result']);
-            } else {
-                $content = 'Error: ' . $result['error'];
-            }
-
-            $toolName = null;
-
-            if (isset($result['tool_name'])) {
-                $toolName = $result['tool_name'];
-            }
-
-            $message = Message::tool($content, $toolName);
-
-            // Add tool_call_id if available (OpenAI format)
-            if (isset($result['id']) && $result['id'] !== null) {
-                $message->toolCallId = $result['id'];
-            }
-
-            $messages[] = $message;
+            $messages[] = $result->toMessage();
         }
 
         return $messages;
@@ -261,10 +255,13 @@ class ToolManager implements JsonSerializable
         );
 
         foreach ($this->tools as $name => $tool) {
+            $parametersSchema = $tool->getParametersSchema();
+            $properties = isset($parametersSchema['properties']) ? $parametersSchema['properties'] : [];
+
             $stats['tools'][$name] = array(
                 'name' => $tool->getName(),
                 'description' => $tool->getDescription(),
-                'parameters_count' => count($tool->getParametersSchema()['properties'])
+                'parameters_count' => is_array($properties) ? count($properties) : 0,
             );
         }
 
