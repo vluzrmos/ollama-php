@@ -41,7 +41,7 @@ class ImageHelper
      */
     public static function encodeImages(array $imagePaths)
     {
-        $encodedImages = array();
+        $encodedImages = [];
         
         foreach ($imagePaths as $imagePath) {
             $encodedImages[] = self::encodeImage($imagePath);
@@ -64,7 +64,7 @@ class ImageHelper
 
     public static function encodeImagesUrl(array $imagesPaths)
     {
-        $encodedImages = array();
+        $encodedImages = [];
 
         foreach ($imagesPaths as $imagePath) {
             $encodedImages[] = static::encodeImageUrl($imagePath);
@@ -106,12 +106,12 @@ class ImageHelper
             return false;
         }
 
-        return array(
+        return [
             'width' => $info[0],
             'height' => $info[1],
             'type' => $info[2],
             'mime' => $info['mime'],
             'size' => filesize($imagePath)
-        );
+        ];
     }
 }

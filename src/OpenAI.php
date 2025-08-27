@@ -221,10 +221,10 @@ class OpenAI
     {
         $convertedMessages = $this->formatMessages($messages);
 
-        $params = array(
+        $params = [
             'model' => $model,
             'messages' => $convertedMessages
-        );
+        ];
 
         $this->parseModelFromParams($params);
 
@@ -268,10 +268,10 @@ class OpenAI
      */
     public function embed($model, $input, array $options = [])
     {
-        $params = array(
+        $params = [
             'model' => $model,
             'input' => $input
-        );
+        ];
 
         $this->parseModelFromParams($params);
 

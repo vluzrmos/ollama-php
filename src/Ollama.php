@@ -189,7 +189,7 @@ class Ollama
      */
     public function showModel($model, $verbose = false)
     {
-        $params = array('model' => $model);
+        $params = ['model' => $model];
         if ($verbose) {
             $params['verbose'] = true;
         }
@@ -207,10 +207,10 @@ class Ollama
      */
     public function copyModel($source, $destination)
     {
-        $params = array(
+        $params = [
             'source' => $source,
             'destination' => $destination
-        );
+        ];
         
         return $this->httpClient->post('/api/copy', $params);
     }
@@ -224,7 +224,7 @@ class Ollama
      */
     public function deleteModel($model)
     {
-        $params = array('model' => $model);
+        $params = ['model' => $model];
         return $this->httpClient->delete('/api/delete', $params);
     }
 
@@ -351,9 +351,9 @@ class Ollama
      */
     public function pushBlob($digest, $data)
     {
-        return $this->httpClient->put('/api/blobs/' . $digest, $data, array(
+        return $this->httpClient->put('/api/blobs/' . $digest, $data, [
             'Content-Type: application/octet-stream'
-        ));
+        ]);
     }
 
     /**

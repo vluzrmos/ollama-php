@@ -28,7 +28,7 @@ class Model
      * @param array $parameters Parâmetros do modelo
      * @param array $options Opções adicionais
      */
-    public function __construct($name, array $parameters = array(), array $options = array())
+    public function __construct($name, array $parameters = [], array $options = [])
     {
         $this->name = $name;
         $this->parameters = $parameters;
@@ -340,9 +340,9 @@ class Model
      */
     public function toArray()
     {
-        $result = array(
+        $result = [
             'model' => $this->name
-        );
+        ];
 
         if (!empty($this->parameters)) {
             $result['options'] = $this->parameters;

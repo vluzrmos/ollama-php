@@ -29,15 +29,15 @@ class HttpClient
      * @param string $baseUrl
      * @param array $options
      */
-    public function __construct($baseUrl, array $options = array())
+    public function __construct($baseUrl, array $options = [])
     {
         $this->baseUrl = rtrim($baseUrl, '/');
-        $this->defaultOptions = array_merge(array(
+        $this->defaultOptions = array_merge([
             'timeout' => 300,
             'connect_timeout' => 30,
             'user_agent' => 'Ollama/1.0',
             'verify_ssl' => true
-        ), $options);
+        ], $options);
 
         // Extract API token from options if provided
         if (isset($options['api_token'])) {
@@ -74,7 +74,7 @@ class HttpClient
      * @return array
      * @throws OllamaException
      */
-    public function get($endpoint, array $headers = array())
+    public function get($endpoint, array $headers = [])
     {
         return $this->request('GET', $endpoint, null, $headers);
     }
@@ -88,7 +88,7 @@ class HttpClient
      * @return array
      * @throws OllamaException
      */
-    public function post($endpoint, $data = null, array $headers = array())
+    public function post($endpoint, $data = null, array $headers = [])
     {
         return $this->request('POST', $endpoint, $data, $headers);
     }
@@ -114,17 +114,17 @@ class HttpClient
         $ch = curl_init();
 
         // Prepare headers
-        $headers = array(
+        $headers = [
             'Content-Type: application/json',
             'Content-Length: ' . strlen($jsonData)
-        );
+        ];
 
         // Add authorization token if available
         if ($this->apiToken) {
             $headers[] = 'Authorization: Bearer ' . $this->apiToken;
         }
 
-        curl_setopt_array($ch, array(
+        curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $jsonData,
@@ -157,7 +157,7 @@ class HttpClient
                 }
                 return strlen($data);
             }
-        ));
+        ]);
 
         $success = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -172,7 +172,7 @@ class HttpClient
             throw new HttpException('Erro HTTP: ' . $httpCode);
         }
 
-        return array('success' => true);
+        return ['success' => true];
     }
 
     /**
@@ -184,7 +184,7 @@ class HttpClient
      * @return array
      * @throws OllamaException
      */
-    public function put($endpoint, $data, array $headers = array())
+    public function put($endpoint, $data, array $headers = [])
     {
         return $this->request('PUT', $endpoint, $data, $headers);
     }
@@ -198,7 +198,7 @@ class HttpClient
      * @return array
      * @throws OllamaException
      */
-    public function delete($endpoint, array $data = null, array $headers = array())
+    public function delete($endpoint, array $data = null, array $headers = [])
     {
         return $this->request('DELETE', $endpoint, $data, $headers);
     }
@@ -211,7 +211,7 @@ class HttpClient
      * @return array
      * @throws OllamaException
      */
-    public function head($endpoint, array $headers = array())
+    public function head($endpoint, array $headers = [])
     {
         return $this->request('HEAD', $endpoint, null, $headers, false);
     }
@@ -227,13 +227,13 @@ class HttpClient
      * @return array
      * @throws OllamaException
      */
-    private function request($method, $endpoint, $data = null, array $headers = array(), $expectBody = true)
+    private function request($method, $endpoint, $data = null, array $headers = [], $expectBody = true)
     {
         $url = $this->baseUrl . $endpoint;
 
         $ch = curl_init();
 
-        $curlOptions = array(
+        $curlOptions = [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => $this->defaultOptions['timeout'],
@@ -241,10 +241,10 @@ class HttpClient
             CURLOPT_USERAGENT => $this->defaultOptions['user_agent'],
             CURLOPT_SSL_VERIFYPEER => $this->defaultOptions['verify_ssl'],
             CURLOPT_CUSTOMREQUEST => $method
-        );
+        ];
 
         // Default headers
-        $defaultHeaders = array();
+        $defaultHeaders = [];
 
         // Add authorization token if available
         if ($this->apiToken) {
@@ -297,7 +297,7 @@ class HttpClient
             if ($httpCode >= 400) {
                 throw new HttpException('HTTP Error: ' . $httpCode, $httpCode);
             }
-            return array('http_code' => $httpCode);
+            return ['http_code' => $httpCode];
         }
 
         // Check HTTP code
@@ -318,6 +318,6 @@ class HttpClient
             return $decoded;
         }
 
-        return array('http_code' => $httpCode, 'body' => $response);
+        return ['http_code' => $httpCode, 'body' => $response];
     }
 }

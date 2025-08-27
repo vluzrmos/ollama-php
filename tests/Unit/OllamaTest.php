@@ -4,6 +4,9 @@ use Vluzrmos\Ollama\Ollama;
 use Vluzrmos\Ollama\Models\Model;
 use Vluzrmos\Ollama\Tools\ToolManager;
 use Vluzrmos\Ollama\Exceptions\HttpException;
+use Vluzrmos\Ollama\Exceptions\RequiredParameterException;
+use Vluzrmos\Ollama\Http\HttpClient;
+use Vluzrmos\Ollama\Models\MessageFormatter;
 
 class OllamaTest extends TestCase
 {
@@ -11,18 +14,18 @@ class OllamaTest extends TestCase
     {
         $client = new Ollama();
         
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Ollama', $client);
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf(Ollama::class, $client);
+        $this->assertInstanceOf(HttpClient::class, $client->getHttpClient());
     }
 
     public function testOllamaCreationWithParameters()
     {
         $baseUrl = 'http://test.com:11434';
-        $options = array('timeout' => 60);
+        $options = ['timeout' => 60];
         
         $client = new Ollama($baseUrl, $options);
         
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf(HttpClient::class, $client->getHttpClient());
     }
 
     public function testDefaultBaseUrl()
@@ -30,7 +33,7 @@ class OllamaTest extends TestCase
         $client = new Ollama();
         
         // Verifica se o client HTTP foi criado - indiretamente testa a URL padrão
-        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client->getHttpClient());
+        $this->assertInstanceOf(HttpClient::class, $client->getHttpClient());
     }
 
     public function testSetAndGetApiToken()
@@ -47,20 +50,20 @@ class OllamaTest extends TestCase
     {
         $client = new Ollama();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\RequiredParameterException');
+        $this->expectException(RequiredParameterException::class);
         $this->expectExceptionMessage('parameter "model" is required');
         
-        $client->generate(array());
+        $client->generate([]);
     }
 
     public function testChatRequiresModel()
     {
         $client = new Ollama();
         
-        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\RequiredParameterException');
+        $this->expectException(RequiredParameterException::class);
         $this->expectExceptionMessage('parameter "model" is required');
         
-        $client->chat(array('messages' => array()));
+        $client->chat(['messages' => []]);
     }
 
     public function testGenerateWithStringModel()

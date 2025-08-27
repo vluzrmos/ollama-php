@@ -17,14 +17,14 @@ abstract class AbstractTool implements ToolInterface
      */
     public function toArray()
     {
-        return array(
+        return [
             'type' => 'function',
-            'function' => array(
+            'function' => [
                 'name' => $this->getName(),
                 'description' => $this->getDescription(),
                 'parameters' => $this->getParametersSchema()
-            )
-        );
+            ]
+        ];
     }
 
 
@@ -41,7 +41,7 @@ abstract class AbstractTool implements ToolInterface
 
         if (isset($data['parameters'])) {
             $parameters = $data['parameters'];
-            $required = isset($parameters['required']) ? $parameters['required'] : array();
+            $required = isset($parameters['required']) ? $parameters['required'] : [];
 
             $parameters['required'] = (object) $required;
             $data['parameters'] = (object) $parameters;

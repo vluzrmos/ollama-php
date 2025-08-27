@@ -38,21 +38,21 @@ class WeatherTool extends AbstractTool
      */
     public function getParametersSchema()
     {
-        return array(
+        return [
             'type' => 'object',
-            'properties' => array(
-                'location' => array(
+            'properties' => [
+                'location' => [
                     'type' => 'string',
                     'description' => 'The city and state, e.g. São Paulo, SP'
-                ),
-                'unit' => array(
+                ],
+                'unit' => [
                     'type' => 'string',
                     'description' => 'Temperature unit',
-                    'enum' => array('celsius', 'fahrenheit')
-                )
-            ),
-            'required' => array('location')
-        );
+                    'enum' => ['celsius', 'fahrenheit']
+                ]
+            ],
+            'required' => ['location']
+        ];
     }
 
     /**
@@ -88,13 +88,13 @@ class WeatherTool extends AbstractTool
     private function getMockWeatherData($location, $unit)
     {
         // Mock data based on some known cities
-        $mockData = array(
-            'São Paulo' => array('temp' => 22, 'condition' => 'partly cloudy', 'humidity' => 65),
-            'Rio de Janeiro' => array('temp' => 28, 'condition' => 'sunny', 'humidity' => 70),
-            'Belo Horizonte' => array('temp' => 25, 'condition' => 'cloudy', 'humidity' => 60),
-            'Salvador' => array('temp' => 30, 'condition' => 'sunny', 'humidity' => 75),
-            'Recife' => array('temp' => 29, 'condition' => 'partly cloudy', 'humidity' => 80)
-        );
+        $mockData = [
+            'São Paulo' => ['temp' => 22, 'condition' => 'partly cloudy', 'humidity' => 65],
+            'Rio de Janeiro' => ['temp' => 28, 'condition' => 'sunny', 'humidity' => 70],
+            'Belo Horizonte' => ['temp' => 25, 'condition' => 'cloudy', 'humidity' => 60],
+            'Salvador' => ['temp' => 30, 'condition' => 'sunny', 'humidity' => 75],
+            'Recife' => ['temp' => 29, 'condition' => 'partly cloudy', 'humidity' => 80]
+        ];
 
         // Search for data based on city name (case-insensitive)
         $cityData = null;
@@ -107,11 +107,11 @@ class WeatherTool extends AbstractTool
 
         // If not found, use generic data
         if (!$cityData) {
-            $cityData = array(
+            $cityData = [
                 'temp' => rand(15, 35),
                 'condition' => 'variable',
                 'humidity' => rand(40, 90)
-            );
+            ];
         }
 
         $temperature = $cityData['temp'];
@@ -121,13 +121,13 @@ class WeatherTool extends AbstractTool
             $temperature = ($temperature * 9 / 5) + 32;
         }
 
-        return array(
+        return [
             'location' => $location,
             'temperature' => $temperature,
             'unit' => $unit,
             'condition' => $cityData['condition'],
             'humidity' => $cityData['humidity'],
             'timestamp' => date('Y-m-d H:i:s')
-        );
+        ];
     }
 }

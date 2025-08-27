@@ -22,7 +22,7 @@ class ToolManager implements JsonSerializable
      */
     public function __construct()
     {
-        $this->tools = array();
+        $this->tools = [];
     }
 
     /**
@@ -89,7 +89,7 @@ class ToolManager implements JsonSerializable
      */
     public function toArray()
     {
-        $tools = array();
+        $tools = [];
 
         foreach ($this->tools as $tool) {
             $tools[] = $tool->toArray();
@@ -110,9 +110,9 @@ class ToolManager implements JsonSerializable
     {
         $tool = $this->getTool($toolName);
         if ($tool === null) {
-            return json_encode(array(
+            return json_encode([
                 'error' => 'Tool not found: ' . $toolName
-            ));
+            ]);
         }
 
         return $tool->execute($arguments);
@@ -133,12 +133,12 @@ class ToolManager implements JsonSerializable
      * Executes multiple tool calls received from an API response
      * 
      * @param array $toolCalls Array of tool calls in OpenAI/Ollama format
-     * @return array Array with execution results
+     * @return array<mixed,ToolCallResult> Array with execution results
      * @throws Exception If any tool is not found
      */
     public function executeToolCalls(array $toolCalls)
     {
-        $results = array();
+        $results = [];
 
         foreach ($toolCalls as $toolCall) {
             // Validate tool call structure
@@ -249,20 +249,20 @@ class ToolManager implements JsonSerializable
      */
     public function getStats()
     {
-        $stats = array(
+        $stats = [
             'total_tools' => count($this->tools),
-            'tools' => array()
-        );
+            'tools' => []
+        ];
 
         foreach ($this->tools as $name => $tool) {
             $parametersSchema = $tool->getParametersSchema();
             $properties = isset($parametersSchema['properties']) ? $parametersSchema['properties'] : [];
 
-            $stats['tools'][$name] = array(
+            $stats['tools'][$name] = [
                 'name' => $tool->getName(),
                 'description' => $tool->getDescription(),
                 'parameters_count' => is_array($properties) ? count($properties) : 0,
-            );
+            ];
         }
 
         return $stats;

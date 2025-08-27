@@ -37,25 +37,25 @@ class CalculatorTool extends AbstractTool
      */
     public function getParametersSchema()
     {
-        return array(
+        return [
             'type' => 'object',
-            'properties' => array(
-                'operation' => array(
+            'properties' => [
+                'operation' => [
                     'type' => 'string',
                     'description' => 'Mathematical operation to perform',
-                    'enum' => array('add', 'subtract', 'multiply', 'divide')
-                ),
-                'a' => array(
+                    'enum' => ['add', 'subtract', 'multiply', 'divide']
+                ],
+                'a' => [
                     'type' => 'number',
                     'description' => 'First number'
-                ),
-                'b' => array(
+                ],
+                'b' => [
                     'type' => 'number',
                     'description' => 'Second number'
-                )
-            ),
-            'required' => array('operation', 'a', 'b')
-        );
+                ]
+            ],
+            'required' => ['operation', 'a', 'b']
+        ];
     }
 
     /**
@@ -111,7 +111,7 @@ class CalculatorTool extends AbstractTool
                 return new ToolExecutionException("Unsupported operation: " . $operation);
         }
 
-        $response = [
+                $response = [
             'operation' => $operation,
             'a' => $a,
             'b' => $b,

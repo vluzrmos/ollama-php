@@ -6,10 +6,10 @@ class OpenAIMessageFormatter implements MessageFormatter
 {
     public function format(Message $message)
     {
-        $data = array(
+        $data = [
             'role' => $message->role,
             'content' => $message->content,
-        );
+        ];
 
         if (!empty($message->images)) {
             $data['content'] = [

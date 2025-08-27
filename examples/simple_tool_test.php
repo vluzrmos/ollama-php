@@ -19,24 +19,24 @@ $toolManager->registerTool(new CalculatorTool());
 $toolManager->registerTool(new WeatherTool());
 
 // Simulate tool calls as they would come from API
-$toolCalls = array(
-    array(
+$toolCalls = [
+    [
         'id' => 'call_calc_001',
         'type' => 'function',
-        'function' => array(
+        'function' => [
             'name' => 'calculator',
             'arguments' => '{"operation": "multiply", "a": 25, "b": 4}'
-        )
-    ),
-    array(
+        ]
+    ],
+    [
         'id' => 'call_weather_001',
         'type' => 'function',
-        'function' => array(
+        'function' => [
             'name' => 'get_current_weather',
             'arguments' => '{"location": "São Paulo", "unit": "celsius"}'
-        )
-    )
-);
+        ]
+    ]
+];
 
 echo "Tool Calls to execute:\n";
 foreach ($toolCalls as $call) {
@@ -46,19 +46,22 @@ echo "\n";
 
 // Execute tool calls
 echo "Executing tool calls...\n\n";
+
 $results = $toolManager->executeToolCalls($toolCalls);
 
 // Show results
 foreach ($results as $result) {
-    echo "=== {$result['tool_name']} ===\n";
-    echo "ID: {$result['id']}\n";
-    echo "Success: " . ($result['success'] ? 'Yes' : 'No') . "\n";
+    $toolName = $result->getToolName();
+    $toolId = $result->getToolCallId();
+    $success = $result->isSuccess();
+
+    $content = $result->getMessageContentString();
+
+    echo "=== {$toolName} ===\n";
+    echo "ID: {$toolCallId}\n";
+    echo "Success: " . ($success ? 'Yes' : 'No') . "\n";
+    echo "Result: ".$content."\n";
     
-    if ($result['success']) {
-        echo "Result:\n{$result['result']}\n";
-    } else {
-        echo "Error: {$result['error']}\n";
-    }
     echo "\n";
 }
 

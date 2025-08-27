@@ -6,10 +6,10 @@ class OllamaMessageFormatter implements MessageFormatter
 {
     public function format(Message $message)
     {
-        $data = array(
+        $data = [
             'role' => $message->role,
             'content' => $message->content,
-        );
+        ];
 
         if ($message->images !== null) {
             $data['images'] = $message->images;

@@ -172,4 +172,26 @@ class ToolCallResult
 
         return $message;
     }
+
+    public function toArray()
+    {
+        return [
+            'tool_name' => $this->toolName,
+            'tool_call_id' => $this->toolCallId,
+            'result' => $this->result,
+            'success' => $this->success,
+            'error_message' => $this->errorMessage,
+        ];
+    }
+
+    public static function fromArray(array $data)
+    {
+        $toolName = isset($data['tool_name']) ? $data['tool_name'] : (isset($data['toolName']) ? $data['toolName'] : null);
+        $toolCallId = isset($data['tool_call_id']) ? $data['tool_call_id'] : (isset($data['toolCallId']) ? $data['toolCallId'] : null);
+        $result = isset($data['result']) ? $data['result'] : null;
+        $success = isset($data['success']) ? (bool)$data['success'] : false;
+        $errorMessage = isset($data['error_message']) ? $data['error_message'] : (isset($data['errorMessage']) ? $data['errorMessage'] : (isset($data['error']) ? $data['error'] : null));
+
+        return new self($toolName, $result, $success, $errorMessage, $toolCallId);
+    }
 }

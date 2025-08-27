@@ -4,8 +4,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 date_default_timezone_set('America/Bahia');
 
-require __DIR__ . '/tools/CalculatorTool.php';
-require __DIR__ . '/tools/WeatherTool.php';
+require_once __DIR__ . '/tools/CalculatorTool.php';
+require_once __DIR__ . '/tools/WeatherTool.php';
 
 use Examples\Tools\CalculatorTool;
 use Examples\Tools\WeatherTool;
@@ -31,7 +31,7 @@ class ChatSystem
     public function __construct()
     {
         $this->client = new Ollama(getenv('OLLAMA_API_URL') ?: 'http://localhost:11434');
-        $this->messages = array();
+        $this->messages = [];
         $this->setupTools();
     }
 
@@ -55,11 +55,11 @@ class ChatSystem
         $this->messages[] = Message::user($userMessage, $images);
 
         try {
-            $params = array(
+            $params = [
                 'model' => $model,
                 'messages' => $this->prepareMessages(),
                 'stream' => false
-            );
+            ];
 
             if (!$images) {
                 $params['tools'] = $this->tools->jsonSerialize();
@@ -93,12 +93,12 @@ class ChatSystem
         
         // Make new call to model with tool results
         try {
-            $response = $this->client->chat(array(
+            $response = $this->client->chat([
                 'model' => $model,
                 'messages' => $this->prepareMessages(),
                 'tools' => $this->tools,
                 'stream' => false
-            ));
+            ]);
 
             $finalMessage = $response['message']['content'];
             $this->messages[] = Message::assistant($finalMessage);
@@ -121,7 +121,7 @@ class ChatSystem
 
     public function clearHistory()
     {
-        $this->messages = array();
+        $this->messages = [];
     }
 }
 
@@ -132,14 +132,14 @@ $chatSystem = new ChatSystem();
 $chatSystem->addSystemMessage('You are a helpful assistant that can use tools to get information about weather, do calculations, and get current date/time. Always respond in English.');
 
 // Conversation simulation
-$conversations = array(
+$conversations = [
     "What is the weather in São Paulo today?",
     "What is 15 + 27?",
     "What time is it now?",
     "Calculate the square root of 144",
     "How is the weather in Rio de Janeiro in Fahrenheit?",
     "Thank you for your help!"
-);
+];
 
 foreach ($conversations as $userInput) {
     echo "User: $userInput\n";

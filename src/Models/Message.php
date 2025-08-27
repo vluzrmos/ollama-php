@@ -123,6 +123,41 @@ class Message implements ArrayAccess
         return $message;
     }
 
+    public function toArray()
+    {
+        $data = [];
+
+        if ($this->role !== null) {
+            $data['role'] = $this->role;
+        }
+
+        if ($this->content !== null) {
+            $data['content'] = $this->content;
+        }
+
+        if ($this->images !== null) {
+            $data['images'] = $this->images;
+        }
+
+        if ($this->toolCalls !== null) {
+            $data['tool_calls'] = $this->toolCalls;
+        }
+
+        if ($this->toolName !== null) {
+            $data['tool_name'] = $this->toolName;
+        }
+
+        if ($this->thinking !== null) {
+            $data['thinking'] = $this->thinking;
+        }
+
+        if ($this->toolCallId !== null) {
+            $data['tool_call_id'] = $this->toolCallId;
+        }
+
+        return $data;
+    }
+
     public static function fromArray(array $message)
     {
         $role = isset($message['role']) ? $message['role'] : null;
