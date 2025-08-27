@@ -16,11 +16,16 @@ class ImageHelper
      */
     public static function encodeImage($imagePath)
     {
-        if (!file_exists($imagePath)) {
+        if (!is_file($imagePath)) {
             throw new \InvalidArgumentException('Image file not found: ' . $imagePath);
         }
 
+        if (!is_readable($imagePath)) {
+            throw new \InvalidArgumentException('Image file is not readable: ' . $imagePath);
+        }
+
         $imageData = file_get_contents($imagePath);
+
         if ($imageData === false) {
             throw new \InvalidArgumentException('Failed to read image file: ' . $imagePath);
         }

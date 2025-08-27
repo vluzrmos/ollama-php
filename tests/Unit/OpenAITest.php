@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../TestCase.php';
-
 use Vluzrmos\Ollama\Exceptions\RequiredParameterException;
 use Vluzrmos\Ollama\OpenAI;
 use Vluzrmos\Ollama\Models\Model;

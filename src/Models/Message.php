@@ -136,12 +136,12 @@ class Message implements ArrayAccess
             throw new \InvalidArgumentException("Array must contain 'role' and 'content' keys.");
         }
 
-        if (is_array($content) && isset($content[0]['type'])) {
+        if (is_array($content) && isset(array_values($content)[0]['type'])) {
             foreach ($content as $part) {
                 if ($part['type'] === 'text') {
                     $content = $part['text'];
                 } elseif ($part['type'] === 'image_url' && isset($part['image_url'])) {
-                    $images = array_merge($images, is_array($part['image_url']) ? $part['image_url'] : [$part['image_url']]);
+                    $images = array_merge((array) $images, (array) $part['image_url']);
                 }
             }
         }

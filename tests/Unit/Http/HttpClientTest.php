@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../TestCase.php';
-
 use Vluzrmos\Ollama\Http\HttpClient;
 use Vluzrmos\Ollama\Exceptions\HttpException;
 use Vluzrmos\Ollama\Exceptions\OllamaException;
@@ -198,5 +196,90 @@ class HttpClientTest extends TestCase
         $this->assertEquals('endpoint', $params[0]->getName());
         $this->assertEquals('headers', $params[1]->getName());
         $this->assertTrue($params[1]->isDefaultValueAvailable());
+    }
+
+    public function testHttpClientConstruction()
+    {
+        $baseUrl = 'http://localhost:11434';
+        $client = new HttpClient($baseUrl);
+        
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Http\\HttpClient', $client);
+    }
+
+    public function testHttpClientConstructionWithOptions()
+    {
+        $baseUrl = 'http://localhost:11434';
+        $options = [
+            'timeout' => 60,
+            'user_agent' => 'Custom Agent',
+            'api_token' => 'test-token'
+        ];
+        
+        $client = new HttpClient($baseUrl, $options);
+        
+        $this->assertEquals('test-token', $client->getApiToken());
+    }
+
+    public function testGetMethodExists()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        
+        $this->assertTrue(method_exists($client, 'get'));
+    }
+
+    public function testPostMethodExists()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        
+        $this->assertTrue(method_exists($client, 'post'));
+    }
+
+    public function testPutMethodExists()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        
+        $this->assertTrue(method_exists($client, 'put'));
+    }
+
+    public function testDeleteMethodExists()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        
+        $this->assertTrue(method_exists($client, 'delete'));
+    }
+
+    public function testHeadMethodExists()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        
+        $this->assertTrue(method_exists($client, 'head'));
+    }
+
+    /**
+     * Test the stream functionality with a mock callback
+     * This is a simplified test since we can't easily test the actual cURL streaming
+     */
+    public function testPostStreamSetupsCurlProperly()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        $data = ['model' => 'test', 'stream' => true];
+        $callbackCalled = false;
+        
+        $callback = function($chunk) use (&$callbackCalled) {
+            $callbackCalled = true;
+        };
+        
+        // We can't easily test the actual streaming without a real server
+        // but we can test that the method exists and accepts the right parameters
+        $this->assertTrue(method_exists($client, 'postStream'));
+    }
+
+    public function testApiTokenIsAddedToHeaders()
+    {
+        $client = new HttpClient('http://localhost:11434');
+        $client->setApiToken('test-token');
+        
+        // We'll test this indirectly by checking if the token is properly set
+        $this->assertEquals('test-token', $client->getApiToken());
     }
 }

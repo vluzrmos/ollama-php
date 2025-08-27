@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../TestCase.php';
-
 use Vluzrmos\Ollama\Exceptions\OllamaException;
 use Vluzrmos\Ollama\Exceptions\HttpException;
+use Vluzrmos\Ollama\Exceptions\RequiredParameterException;
+use Vluzrmos\Ollama\Exceptions\ToolExecutionException;
 
 class ExceptionsTest extends TestCase
 {
@@ -103,5 +103,100 @@ class ExceptionsTest extends TestCase
         }
         
         $this->assertTrue($caught, 'Exceção HTTP não foi capturada como OllamaException');
+    }
+
+    public function testOllamaExceptionConstruction()
+    {
+        $message = 'Test error message';
+        $code = 500;
+        
+        $exception = new OllamaException($message, $code);
+        
+        $this->assertInstanceOf('Exception', $exception);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $exception);
+        $this->assertEquals($message, $exception->getMessage());
+        $this->assertEquals($code, $exception->getCode());
+    }
+
+    public function testHttpExceptionConstruction()
+    {
+        $message = 'HTTP error';
+        $code = 404;
+        $previous = new Exception('Previous error');
+        $responseData = ['error' => 'Not found'];
+        
+        $exception = new HttpException($message, $code, $previous, $responseData);
+        
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\OllamaException', $exception);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\HttpException', $exception);
+        $this->assertEquals($message, $exception->getMessage());
+        $this->assertEquals($code, $exception->getCode());
+        $this->assertSame($previous, $exception->getPrevious());
+        $this->assertEquals($responseData, $exception->getResponseData());
+    }
+
+    public function testHttpExceptionWithoutResponseData()
+    {
+        $exception = new HttpException('HTTP error', 500);
+        
+        $this->assertNull($exception->getResponseData());
+    }
+
+    public function testRequiredParameterExceptionParameterMethod()
+    {
+        $paramName = 'model';
+        
+        $exception = RequiredParameterException::parameter($paramName);
+        
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\RequiredParameterException', $exception);
+        $this->assertContains($paramName, $exception->getMessage());
+        $this->assertContains('is required', $exception->getMessage());
+    }
+
+    public function testRequiredParameterExceptionConstruction()
+    {
+        $message = 'Custom required parameter message';
+        
+        $exception = new RequiredParameterException($message);
+        
+        $this->assertEquals($message, $exception->getMessage());
+    }
+
+    public function testToolExecutionExceptionConstruction()
+    {
+        $message = 'Tool execution failed';
+        $code = 100;
+        
+        $exception = new ToolExecutionException($message, $code);
+        
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Exceptions\\ToolExecutionException', $exception);
+        $this->assertEquals($message, $exception->getMessage());
+        $this->assertEquals($code, $exception->getCode());
+    }
+
+    public function testHttpExceptionGetResponseDataMethod()
+    {
+        $responseData = [
+            'error' => 'Not found',
+            'details' => 'The requested resource was not found'
+        ];
+        
+        $exception = new HttpException('HTTP 404', 404, null, $responseData);
+        
+        $this->assertEquals($responseData, $exception->getResponseData());
+        $this->assertEquals('Not found', $exception->getResponseData()['error']);
+    }
+
+    public function testRequiredParameterExceptionDifferentParameters()
+    {
+        $params = ['model', 'messages', 'prompt', 'input'];
+        
+        foreach ($params as $param) {
+            $exception = RequiredParameterException::parameter($param);
+            
+            $this->assertContains($param, $exception->getMessage());
+            $this->assertContains('is required', $exception->getMessage());
+            $this->assertEquals(sprintf('parameter "%s" is required', $param), $exception->getMessage());
+        }
     }
 }

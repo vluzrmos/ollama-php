@@ -64,25 +64,6 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Mark the test as skipped.
-     *
-     * @param string $message
-     *
-     * @throws PHPUnit_Framework_SkippedTestError
-     */
-    public static function markTestSkipped($message = '')
-    {
-        $debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-
-        if (isset($debug[0]['class']) && isset($debug[0]['function'])) {
-            echo trim($message . " (skipped in {$debug[0]['class']}::{$debug[0]['function']})");
-        }
-
-        
-        return parent::markTestSkipped($message);
-    }
-
-    /**
      * Cria um mock para HttpClient
      *
      * @return PHPUnit_Framework_MockObject_MockObject

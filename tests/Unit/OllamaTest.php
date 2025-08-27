@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../TestCase.php';
-
 use Vluzrmos\Ollama\Ollama;
 use Vluzrmos\Ollama\Models\Model;
 use Vluzrmos\Ollama\Tools\ToolManager;
@@ -43,6 +41,26 @@ class OllamaTest extends TestCase
         
         $client->setApiToken('test-token');
         $this->assertEquals('test-token', $client->getApiToken());
+    }
+
+    public function testGenerateRequiresModel()
+    {
+        $client = new Ollama();
+        
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\RequiredParameterException');
+        $this->expectExceptionMessage('parameter "model" is required');
+        
+        $client->generate(array());
+    }
+
+    public function testChatRequiresModel()
+    {
+        $client = new Ollama();
+        
+        $this->expectException('Vluzrmos\\Ollama\\Exceptions\\RequiredParameterException');
+        $this->expectExceptionMessage('parameter "model" is required');
+        
+        $client->chat(array('messages' => array()));
     }
 
     public function testGenerateWithStringModel()
@@ -457,5 +475,26 @@ class OllamaTest extends TestCase
 
         $this->assertArrayHasKey('success', $result);
         $this->assertTrue($result['success']);
+    }
+
+    public function testMessageFormatterGetter()
+    {
+        $client = new Ollama();
+        
+        $formatter = $client->getMessageFormatter();
+        
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Models\\MessageFormatter', $formatter);
+        $this->assertInstanceOf('Vluzrmos\\Ollama\\Models\\OllamaMessageFormatter', $formatter);
+    }
+
+    public function testMessageFormatterSetter()
+    {
+        $client = new Ollama();
+        $customFormatter = new \Vluzrmos\Ollama\Models\OpenAIMessageFormatter();
+        
+        $result = $client->setMessageFormatter($customFormatter);
+        
+        $this->assertSame($client, $result); // Test fluent interface
+        $this->assertSame($customFormatter, $client->getMessageFormatter());
     }
 }

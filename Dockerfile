@@ -8,7 +8,15 @@ RUN apk add --no-cache \
         curl-dev \
         libzip-dev \
         zip \
-        && docker-php-ext-install -j$(nproc) curl xml zip
+        autoconf \
+        gcc \
+        g++ \
+        make \
+        && docker-php-ext-install -j$(nproc) curl xml zip \
+        && pecl install xdebug-2.5.5 \
+        && docker-php-ext-enable xdebug
+
+COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 WORKDIR /app
 
