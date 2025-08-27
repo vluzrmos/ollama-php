@@ -32,7 +32,8 @@ You can set the following environment variables to configure the client:
 | OPENAI_API_URL | http://localhost:11434/v1 | Defines the base URL for OpenAI API requests |
 | OLLAMA_API_URL | http://localhost:11434 | Defines the base URL for Ollama API requests |
 | RUN_INTEGRATION_TESTS | 1 | Set to 1 to enable integration tests, requires Ollama server running locally |
-| TEST_MODEL | llama3.2:1b | Defines the model to be used in tests |
+| TEST_MODEL | qwen2.5:3b | Defines the model to be used in tests |
+| TEST_VISION_MODEL | qwen2.5vl:3b | Defines the vision model to be used in tests |
 
 > Make sure to adjust the URLs and ports according to your Ollama/OpenAI server configuration.
 
