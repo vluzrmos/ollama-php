@@ -90,9 +90,13 @@ $response = $openai->chat($model, [
 ]);
 
 // Or use with Ollama client
-$params = array_merge($model->toArray(), [
-    'messages' => [Message::user('Tell me a story')]
+$params = [
+    'model'=>$model, 
+    'messages' => [
+        Message::user('Tell me a story')
+    ]
 ]);
+
 $response = $ollama->chat($params);
 ```
 

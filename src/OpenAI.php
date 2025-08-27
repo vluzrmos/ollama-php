@@ -41,7 +41,7 @@ class OpenAI
      * @param string $apiKey API key (required but ignored by Ollama)
      * @param array $options Additional configuration options
      */
-    public function __construct($baseUrl = 'http://localhost:11434/v1', $apiKey = 'ollama', array $options = array(), MessageFormatter $messageFormatter = null)
+    public function __construct($baseUrl = 'http://localhost:11434/v1', $apiKey = 'ollama', array $options = [], MessageFormatter $messageFormatter = null)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->apiKey = $apiKey;
@@ -217,7 +217,7 @@ class OpenAI
      * @return array
      * @throws OllamaException
      */
-    public function chat($model, array $messages, array $options = array(), $streamCallback = null)
+    public function chat($model, array $messages, array $options = [], $streamCallback = null)
     {
         $convertedMessages = $this->formatMessages($messages);
 
@@ -227,13 +227,6 @@ class OpenAI
         );
 
         $this->parseModelFromParams($params);
-
-        // Se for uma instância de Model, mescla os parâmetros
-        if ($model instanceof Model) {
-            $modelArray = $model->toArray();
-            unset($modelArray['model']); // Remove o nome do modelo pois já foi definido
-            $params = array_merge($params, $modelArray);
-        }
 
         $params = array_merge($params, $options);
 
@@ -250,21 +243,14 @@ class OpenAI
      * @return array
      * @throws OllamaException
      */
-    public function complete($model, $prompt, array $options = array(), $streamCallback = null)
+    public function complete($model, $prompt, array $options = [], $streamCallback = null)
     {
-        $params = array(
+        $params = [
             'model' => $model,
             'prompt' => $prompt
-        );
+        ];
 
         $this->parseModelFromParams($params);
-
-        // Se for uma instância de Model, mescla os parâmetros
-        if ($model instanceof Model) {
-            $modelArray = $model->toArray();
-            unset($modelArray['model']); // Remove o nome do modelo pois já foi definido
-            $params = array_merge($params, $modelArray);
-        }
 
         $params = array_merge($params, $options);
 
@@ -280,7 +266,7 @@ class OpenAI
      * @return array
      * @throws OllamaException
      */
-    public function embed($model, $input, array $options = array())
+    public function embed($model, $input, array $options = [])
     {
         $params = array(
             'model' => $model,
@@ -314,7 +300,7 @@ class OpenAI
      * @return void
      * @throws OllamaException
      */
-    public function chatStream($model, array $messages, callable $callback, array $options = array())
+    public function chatStream($model, array $messages, callable $callback, array $options = [])
     {
         $options['stream'] = true;
         $this->chat($model, $messages, $options, $callback);
@@ -330,7 +316,7 @@ class OpenAI
      * @return void
      * @throws OllamaException
      */
-    public function completeStream($model, $prompt, callable $callback, array $options = array())
+    public function completeStream($model, $prompt, callable $callback, array $options = [])
     {
         $options['stream'] = true;
         $this->complete($model, $prompt, $options, $callback);

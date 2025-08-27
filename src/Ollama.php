@@ -35,7 +35,7 @@ class Ollama
      * @param string $baseUrl Base URL of the Ollama server (e.g. http://localhost:11434)
      * @param array $options Additional configuration options
      */
-    public function __construct($baseUrl = 'http://localhost:11434', array $options = array(), MessageFormatter $messageFormatter = null)
+    public function __construct($baseUrl = 'http://localhost:11434', array $options = [], MessageFormatter $messageFormatter = null)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->httpClient = new HttpClient($this->baseUrl, $options);
