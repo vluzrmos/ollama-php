@@ -318,7 +318,7 @@ $response = $openai->chat('llama3.2', [
     Message::system('Always respond in valid JSON.'),
     Message::user('List 3 primary colors')
 ], [
-    'response_format' => $openai->jsonFormat()
+    'response_format' => 'json_object'
 ]);
 ```
 
