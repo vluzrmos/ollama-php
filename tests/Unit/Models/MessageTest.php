@@ -216,9 +216,55 @@ class MessageTest extends TestCase
         
         // Invalid properties should return null
         $this->assertNull($message['invalid_property']);
+    }
+
+    public function testArrayAccessWithAdditionalAttributes()
+    {
+        $message = new Message('user', 'Hello', null, ['custom_attr' => 'custom_value']);
         
-        // Setting invalid properties should be ignored
-        $message['invalid_property'] = 'value';
-        $this->assertNull($message['invalid_property']);
+        $message->custom_attr2 = 'another_value';
+
+        // Invalid properties should return null
+        $this->assertNull($message['attr_doest_exists']);
+
+        $this->assertEquals('custom_value', $message['custom_attr']);
+
+        $messageArray = $message->toArray();
+
+        $this->assertArrayHasKey('custom_attr', $messageArray);
+        $this->assertArrayHasKey('custom_attr2', $messageArray);
+        $this->assertEquals('custom_value', $messageArray['custom_attr']);
+        $this->assertEquals('another_value', $messageArray['custom_attr2']);
+    }
+
+    public function testSluggedProperties()
+    {
+        $array = [
+            'role' => 'user',
+            'content' => 'Hello world',
+            'tool_name' => 'calculator',
+            'tool_call_id' => '12345'
+        ];
+        
+        $message = Message::fromArray($array);
+        
+        $message->tool_calls = [['name' => 'calc', 'arguments' => '2+2']];
+        
+        $this->assertEquals('calculator', $message->toolName);
+        $this->assertEquals('12345', $message->toolCallId);
+        $this->assertEquals('calculator', $message['tool_name']);
+        $this->assertEquals('12345', $message['tool_call_id']);
+        $this->assertEquals('calculator', $message->tool_name);
+        $this->assertEquals('12345', $message->tool_call_id);
+        $this->assertEquals([['name' => 'calc', 'arguments' => '2+2']], $message->tool_calls);
+        $this->assertEquals([['name' => 'calc', 'arguments' => '2+2']], $message['tool_calls']);
+        $this->assertEquals([['name' => 'calc', 'arguments' => '2+2']], $message->toolCalls);
+
+        $message->toolCalls = [['name' => 'calc2', 'arguments' => '3+3']];
+
+        $this->assertEquals([['name' => 'calc2', 'arguments' => '3+3']], $message->tool_calls);
+        $this->assertEquals([['name' => 'calc2', 'arguments' => '3+3']], $message['tool_calls']);
+        $this->assertEquals([['name' => 'calc2', 'arguments' => '3+3']], $message->toolCalls);
+        $this->assertEquals([['name' => 'calc2', 'arguments' => '3+3']], $message['toolCalls']);
     }
 }

@@ -45,15 +45,22 @@ class Message implements ArrayAccess
     public $thinking;
 
     /**
+     * @var array
+     */
+    public $__attributes = [];
+
+    /**
      * @param string $role
      * @param string $content
+     * @param array $attributes Additional attributes
      * @param array|null $images
      */
-    public function __construct($role, $content, array $images = null)
+    public function __construct($role, $content, array $images = null, array $attributes = [])
     {
         $this->role = $role;
         $this->content = $content;
         $this->images = $images;
+        $this->__attributes = $attributes;
     }
 
     /**
@@ -155,6 +162,12 @@ class Message implements ArrayAccess
             $data['tool_call_id'] = $this->toolCallId;
         }
 
+        foreach ($this->__attributes as $key => $value) {
+            if (!array_key_exists($key, $data)) {
+                $data[$key] = $value;
+            }
+        }
+
         return $data;
     }
 
@@ -166,19 +179,23 @@ class Message implements ArrayAccess
         $thinking = isset($message['thinking']) ? $message['thinking'] : null;
         $toolName = isset($message['tool_name']) ? $message['tool_name'] : (isset($message['toolName']) ? $message['toolName'] : null);
         $toolCallId = isset($message['tool_call_id']) ? $message['tool_call_id'] : (isset($message['toolCallId']) ? $message['toolCallId'] : null);
-        
+
         if ($role === null || $content === null) {
             throw new \InvalidArgumentException("Array must contain 'role' and 'content' keys.");
         }
 
         if (is_array($content) && isset(array_values($content)[0]['type'])) {
+            $texts = [];
+
             foreach ($content as $part) {
                 if ($part['type'] === 'text') {
-                    $content = $part['text'];
+                    $texts[] = $part['text'];
                 } elseif ($part['type'] === 'image_url' && isset($part['image_url'])) {
                     $images = array_merge((array) $images, (array) $part['image_url']);
                 }
             }
+
+            $content = implode("\n", $texts);
         }
 
         $instance = new self($role, $content, $images);
@@ -195,12 +212,18 @@ class Message implements ArrayAccess
             $instance->toolCallId = $toolCallId;
         }
 
+        foreach ($message as $key => $value) {
+            if (!in_array($key, ['role', 'content', 'images', 'thinking', 'tool_name', 'toolCallName', 'tool_call_id', 'toolCallId'])) {
+                $instance->params[$key] = $value;
+            }
+        }
+
         return $instance;
     }
 
     protected function getAcessibleProperties()
     {
-        return [
+        $properties = [
             'role',
             'content',
             'images',
@@ -209,14 +232,22 @@ class Message implements ArrayAccess
             'thinking',
             'toolCallId',
         ];
+
+        return array_merge($properties, array_keys($this->sluggedProperties()));
     }
 
     public function offsetGet($offset)
     {
+        $offset = $this->getSluggedPropertyOriginalName($offset);
+
         $props = $this->getAcessibleProperties();
 
         if (in_array($offset, $props, true)) {
             return $this->$offset;
+        }
+
+        if (array_key_exists($offset, $this->__attributes)) {
+            return $this->__attributes[$offset];
         }
 
         return null;
@@ -224,20 +255,68 @@ class Message implements ArrayAccess
 
     public function offsetExists($offset)
     {
-        return in_array($offset, $this->getAcessibleProperties(), true);
+        $offset = $this->getSluggedPropertyOriginalName($offset);
+
+        return in_array($offset, $this->getAcessibleProperties(), true) || array_key_exists($offset, $this->__attributes);
     }
 
     public function offsetSet($offset, $value)
     {
+        if ($offset === null || $offset === '') {
+            return;
+        }
+
+        $offset = $this->getSluggedPropertyOriginalName($offset);
+
         if (in_array($offset, $this->getAcessibleProperties(), true)) {
             $this->$offset = $value;
+
+            return;
         }
+
+        $this->__attributes[$offset] = $value;
     }
 
     public function offsetUnset($offset)
     {
+        $offset = $this->getSluggedPropertyOriginalName($offset);
+
         if (in_array($offset, $this->getAcessibleProperties(), true)) {
             $this->$offset = null;
         }
+
+        if (array_key_exists($offset, $this->__attributes)) {
+            unset($this->__attributes[$offset]);
+        }
+    }
+
+    protected function sluggedProperties()
+    {
+        return [
+            'tool_calls' => 'toolCalls',
+            'tool_name' => 'toolName',
+            'tool_call_id' => 'toolCallId',
+        ];
+    }
+
+    public function getSluggedPropertyOriginalName($key)
+    {
+        $slugs = $this->sluggedProperties();
+
+        if (array_key_exists($key, $slugs)) {
+            return $slugs[$key];
+        }
+
+        return $key;
+    }
+
+    public function __get($key)
+    {
+        return $this->offsetGet($key);
+    }
+
+    public function __set($key, $value)
+    {
+        $this->offsetSet($key, $value);
     }
 }

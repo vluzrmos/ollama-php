@@ -31,6 +31,12 @@ class OllamaMessageFormatter implements MessageFormatter
             $data['tool_call_id'] = $message->toolCallId;
         }
 
+        foreach ($message->__attributes as $key => $value) {
+            if (!array_key_exists($key, $data)) {
+                $data[$key] = $value;
+            }
+        }
+
         return $data;
     }
 }
