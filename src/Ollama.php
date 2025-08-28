@@ -9,6 +9,9 @@ use Vluzrmos\Ollama\Models\Message;
 use Vluzrmos\Ollama\Models\MessageFormatter;
 use Vluzrmos\Ollama\Models\Model;
 use Vluzrmos\Ollama\Models\OllamaMessageFormatter;
+use Vluzrmos\Ollama\Models\Response;
+use Vluzrmos\Ollama\Models\ResponseEmbedding;
+use Vluzrmos\Ollama\Models\ResponseMessage;
 
 /**
  * Main client for the Ollama API
@@ -69,7 +72,7 @@ class Ollama
      *
      * @param array $params Parâmetros da requisição
      * @param callable|null $streamCallback Callback para streaming (opcional)
-     * @return array
+     * @return Response|ResponseMessage
      * @throws OllamaException
      */
     public function generate(array $params, $streamCallback = null)
@@ -79,10 +82,10 @@ class Ollama
         $this->parseModelFromParams($params);
 
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
-            return $this->httpClient->postStream($endpoint, $params, $streamCallback);
+            return new Response($this->httpClient->postStream($endpoint, $params, $streamCallback));
         }
         
-        return $this->httpClient->post($endpoint, $params);
+        return new ResponseMessage($this->httpClient->post($endpoint, $params));
     }
 
     /**
@@ -90,7 +93,7 @@ class Ollama
      *
      * @param array $params Parâmetros da requisição
      * @param callable|null $streamCallback Callback para streaming (opcional)
-     * @return array
+     * @return ResponseMessage
      * @throws OllamaException
      */
     public function chat(array $params, $streamCallback = null)
@@ -104,7 +107,7 @@ class Ollama
             return $this->httpClient->postStream($endpoint, $params, $streamCallback);
         }
         
-        return $this->httpClient->post($endpoint, $params);
+        return new ResponseMessage($this->httpClient->post($endpoint, $params));
     }
 
     protected function formatMessagesFromParams(array &$params)
@@ -289,14 +292,14 @@ class Ollama
      * Gera embeddings para texto
      *
      * @param array $params Parâmetros da requisição
-     * @return array
+     * @return ResponseEmbedding
      * @throws OllamaException
      */
     public function embeddings(array $params)
     {
         $this->parseModelFromParams($params);
 
-        return $this->httpClient->post('/api/embed', $params);
+        return new ResponseEmbedding($this->httpClient->post('/api/embed', $params));
     }
 
     /**

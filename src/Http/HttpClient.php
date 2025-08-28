@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\ServerException;
 use Psr\Http\Message\ResponseInterface;
 use Vluzrmos\Ollama\Exceptions\HttpException;
 use Vluzrmos\Ollama\Exceptions\OllamaException;
+use Vluzrmos\Ollama\Models\ResponseStream;
 
 /**
  * HTTP Client for communicating with the Ollama API using Guzzle
@@ -278,7 +279,7 @@ class HttpClient
                 if (!empty($line)) {
                     $decoded = json_decode($line, true);
                     if ($decoded !== null) {
-                        call_user_func($callback, $decoded);
+                        call_user_func($callback, new ResponseStream($decoded));
                     }
                 }
             }

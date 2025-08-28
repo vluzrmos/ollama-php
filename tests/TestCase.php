@@ -224,7 +224,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
      * @param array $array
      * @param string $message
      */
-    protected function assertArrayHasKeys(array $expectedKeys, array $array, $message = '')
+    protected function assertArrayHasKeys(array $expectedKeys, $array, $message = '')
     {
         foreach ($expectedKeys as $key) {
             $this->assertArrayHasKey($key, $array, $message . " (key: $key)");

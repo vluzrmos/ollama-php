@@ -20,6 +20,9 @@ try {
         'prompt' => 'Why is the sky blue?',
         'stream' => false
     ]);
+
+    echo "Model: " . $response->getModel() . "\n";
+    echo "Created at: " . ($response->getCreatedAt() ? $response->getCreatedAt()->format('Y-m-d H:i:s') : 'N/A') . "\n";
     
     echo "Response: " . $response['response'] . "\n\n";
 } catch (Exception $e) {

@@ -9,6 +9,9 @@ use Vluzrmos\Ollama\Models\Model;
 use Vluzrmos\Ollama\Models\Message;
 use Vluzrmos\Ollama\Models\MessageFormatter;
 use Vluzrmos\Ollama\Models\OpenAIMessageFormatter;
+use Vluzrmos\Ollama\Models\Response;
+use Vluzrmos\Ollama\Models\ResponseEmbedding;
+use Vluzrmos\Ollama\Models\ResponseMessage;
 
 /**
  * Client for OpenAI-compatible API using Ollama
@@ -77,7 +80,7 @@ class OpenAI
      *
      * @param array $params Parâmetros da requisição
      * @param callable|null $streamCallback Callback para streaming (opcional)
-     * @return array
+     * @return Response|ResponseMessage
      * @throws OllamaException
      */
     public function chatCompletions(array $params, $streamCallback = null)
@@ -93,10 +96,10 @@ class OpenAI
         $params['messages'] = $this->formatMessages($params['messages']);
 
         if ($streamCallback !== null && isset($params['stream']) && $params['stream']) {
-            return $this->httpClient->postStream($endpoint, $params, $streamCallback);
+            return new Response($this->httpClient->postStream($endpoint, $params, $streamCallback));
         }
 
-        return $this->httpClient->post($endpoint, $params);
+        return new ResponseMessage($this->httpClient->post($endpoint, $params));
     }
 
     /**
@@ -104,7 +107,7 @@ class OpenAI
      *
      * @param array $params Parâmetros da requisição
      * @param callable|null $streamCallback Callback para streaming (opcional)
-     * @return array
+     * @return ResponseMessage
      * @throws OllamaException
      */
     public function completions(array $params, $streamCallback = null)
@@ -121,14 +124,14 @@ class OpenAI
             return $this->httpClient->postStream($endpoint, $params, $streamCallback);
         }
 
-        return $this->httpClient->post($endpoint, $params);
+        return new ResponseMessage($this->httpClient->post($endpoint, $params));
     }
 
     /**
      * Embeddings - Compatível com OpenAI API
      *
      * @param array $params Parâmetros da requisição
-     * @return array
+     * @return ResponseEmbedding
      * @throws OllamaException
      */
     public function embeddings(array $params)
@@ -141,7 +144,7 @@ class OpenAI
             throw RequiredParameterException::parameter('input');
         }
 
-        return $this->httpClient->post($endpoint, $params);
+        return new ResponseEmbedding($this->httpClient->post($endpoint, $params));
     }
 
     /**
@@ -214,7 +217,7 @@ class OpenAI
      * @param array $messages Array of messages
      * @param array $options Additional options
      * @param callable|null $streamCallback Callback para streaming
-     * @return array
+     * @return Response|ResponseMessage
      * @throws OllamaException
      */
     public function chat($model, array $messages, array $options = [], $streamCallback = null)
