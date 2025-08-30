@@ -6,8 +6,8 @@ PHP client for Ollama/OpenAI API, compatible with PHP 5.6+. This library provide
 
 - ✅ Compatible with PHP 5.6+
 - ✅ Full support for Ollama native API
-- ✅ **New**: OpenAI API endpoints compatibility
-- ✅ **New**: `Model` class for reusable model configuration
+- ✅ OpenAI API endpoints compatibility
+- ✅ `Model` class for reusable model configuration
 - ✅ Chat completions with history
 - ✅ Response streaming
 - ✅ Image support (vision models like Llava)
