@@ -22,6 +22,6 @@ WORKDIR /app
 
 COPY . /app
 
-RUN composer install --optimize-autoloader
+RUN composer install
 
 CMD ["php", "/app/vendor/bin/phpunit"]

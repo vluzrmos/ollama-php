@@ -20,7 +20,7 @@ PHP client for Ollama/OpenAI API, compatible with PHP 5.6+. This library provide
 ## Installation
 
 ```bash
-composer require vluzrrmos/ollama-php
+composer require vluzrrmos/ollama
 ```
 
 ## Quick Usage
