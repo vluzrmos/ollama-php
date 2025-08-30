@@ -220,7 +220,7 @@ class Message implements ArrayAccess
 
         foreach ($message as $key => $value) {
             if (!in_array($key, ['role', 'content', 'images', 'thinking', 'tool_name', 'toolCalls', 'toolCallName', 'tool_call_id', 'toolCallId'])) {
-                $instance->params[$key] = $value;
+                $instance->__attributes[$key] = $value;
             }
         }
 

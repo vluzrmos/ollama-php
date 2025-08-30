@@ -267,4 +267,41 @@ class MessageTest extends TestCase
         $this->assertEquals([['name' => 'calc2', 'arguments' => '3+3']], $message->toolCalls);
         $this->assertEquals([['name' => 'calc2', 'arguments' => '3+3']], $message['toolCalls']);
     }
+
+    public function testToolCallsFromArray()
+    {
+        $array = [
+            'role' => 'assistant',
+            'content' => 'Here is the result',
+            'tool_calls' => [
+                ['name' => 'search', 'arguments' => 'OpenAI'],
+                ['name' => 'calculator', 'arguments' => '2+2']
+            ]
+        ];
+        
+        $message = Message::fromArray($array);
+        
+        $this->assertEquals('assistant', $message->role);
+        $this->assertEquals('Here is the result', $message->content);
+        $this->assertCount(2, $message->toolCalls);
+        $this->assertEquals('search', $message->toolCalls[0]['name']);
+        $this->assertEquals('OpenAI', $message->toolCalls[0]['arguments']);
+        $this->assertEquals('calculator', $message->toolCalls[1]['name']);
+        $this->assertEquals('2+2', $message->toolCalls[1]['arguments']);
+    }
+
+    public function testAddAttributesFromArray()
+    {
+        $array = [
+            'role' => 'user',
+            'content' => 'Hello world',
+            'custom1' => 'value1',
+            'custom2' => 'value2'
+        ];
+        
+        $message = Message::fromArray($array);
+        
+        $this->assertEquals('value1', $message->custom1);
+        $this->assertEquals('value2', $message->custom2);
+    }
 }
