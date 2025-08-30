@@ -38,7 +38,11 @@ class MessageArrayStore implements MessageStore
 
     public function get($index)
     {
-        return $this->messages[$index] ?? null;
+        if (array_key_exists($index, $this->messages)) {
+            return $this->messages[$index];
+        }
+
+        return null;
     }
 
     public function set($index, Message $message)

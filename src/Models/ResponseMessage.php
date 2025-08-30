@@ -26,14 +26,30 @@ class ResponseMessage extends ResponseModel
         return $messages ?: [];
     }
 
+    /**
+     * Get messages as Message instances
+     * 
+     * @return Message[]
+     */
     public function getMessages()
     {
         $messages = [];
 
         foreach ($this->getRawMessages() as $message) {
-            $messages = Message::fromArray($message);
+            $messages[] = Message::fromArray($message);
         }
 
         return $messages;
+    }
+
+    public function hasToolCalls()
+    {
+        foreach ($this->getMessages() as $message) {
+            if ($message->hasToolCalls()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

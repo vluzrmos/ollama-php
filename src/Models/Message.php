@@ -180,6 +180,8 @@ class Message implements ArrayAccess
         $toolName = isset($message['tool_name']) ? $message['tool_name'] : (isset($message['toolName']) ? $message['toolName'] : null);
         $toolCallId = isset($message['tool_call_id']) ? $message['tool_call_id'] : (isset($message['toolCallId']) ? $message['toolCallId'] : null);
 
+        $toolCalls = isset($message['tool_calls']) ? $message['tool_calls'] : (isset($message['toolCalls']) ? $message['toolCalls'] : null);
+
         if ($role === null || $content === null) {
             throw new \InvalidArgumentException("Array must contain 'role' and 'content' keys.");
         }
@@ -212,8 +214,12 @@ class Message implements ArrayAccess
             $instance->toolCallId = $toolCallId;
         }
 
+        if ($toolCalls !== null) {
+            $instance->toolCalls = $toolCalls;
+        }
+
         foreach ($message as $key => $value) {
-            if (!in_array($key, ['role', 'content', 'images', 'thinking', 'tool_name', 'toolCallName', 'tool_call_id', 'toolCallId'])) {
+            if (!in_array($key, ['role', 'content', 'images', 'thinking', 'tool_name', 'toolCalls', 'toolCallName', 'tool_call_id', 'toolCallId'])) {
                 $instance->params[$key] = $value;
             }
         }
@@ -318,5 +324,10 @@ class Message implements ArrayAccess
     public function __set($key, $value)
     {
         $this->offsetSet($key, $value);
+    }
+
+    public function hasToolCalls()
+    {
+        return is_array($this->toolCalls) && !empty($this->toolCalls);
     }
 }
