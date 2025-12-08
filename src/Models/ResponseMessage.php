@@ -52,4 +52,17 @@ class ResponseMessage extends ResponseModel
 
         return false;
     }
+
+    public function getToolCalls()
+    {
+        $toolCalls = [];
+
+        foreach ($this->getMessages() as $message) {
+            if ($message->hasToolCalls()) {
+                $toolCalls = array_merge($toolCalls, (array) $message->toolCalls);
+            }
+        }
+
+        return $toolCalls;
+    }
 }
