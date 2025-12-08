@@ -182,8 +182,8 @@ class Message implements ArrayAccess
 
         $toolCalls = isset($message['tool_calls']) ? $message['tool_calls'] : (isset($message['toolCalls']) ? $message['toolCalls'] : null);
 
-        if ($role === null || $content === null) {
-            throw new \InvalidArgumentException("Array must contain 'role' and 'content' keys.");
+        if ($role === null) {
+            throw new \InvalidArgumentException("Array must contain 'role'.");
         }
 
         if (is_array($content) && isset(array_values($content)[0]['type'])) {
