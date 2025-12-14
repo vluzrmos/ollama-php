@@ -2,6 +2,7 @@
 
 namespace Vluzrmos\Ollama\Tools;
 
+use ArrayObject;
 use Vluzrmos\Ollama\Exceptions\ToolExecutionException;
 
 class TimeTool extends AbstractTool
@@ -36,6 +37,7 @@ class TimeTool extends AbstractTool
         if ($this->timezone) {
             return [
                 'type' => 'object',
+                'properties' => new ArrayObject([])
             ];
         }
 
