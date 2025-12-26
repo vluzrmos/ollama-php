@@ -90,7 +90,7 @@ If you will respond directly, just provide your response without any prefixes.';
     }
 
     /**
-     * Gets the agent group description
+     * Gets the agent group description for direct responses
      *
      * @return string
      */
@@ -100,7 +100,9 @@ If you will respond directly, just provide your response without any prefixes.';
     }
 
     /**
-     * Gets the selector instructions
+     * Gets the selector instructions for agent selection
+     * it includes the list of available agents {AGENT_LIST} placeholder
+     * and the "AGENT: agent_name" response format.
      *
      * @return string
      */
@@ -326,7 +328,7 @@ If you will respond directly, just provide your response without any prefixes.';
         // Add basic instructions for direct response
         $messages[] = [
             'role' => 'system',
-            'content' => 'You are a helpful AI assistant. Respond to the user\'s query directly and helpfully.'
+            'content' => $this->getDescription(),
         ];
 
         // Add conversation history
